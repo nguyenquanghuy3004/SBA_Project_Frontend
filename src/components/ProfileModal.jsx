@@ -6,6 +6,12 @@ import "../App.css";
 const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
     const isStudent = user?.roles.includes("ROLE_STUDENT");
     const isTeacher = user?.roles.includes("ROLE_TEACHER");
 
@@ -46,10 +52,11 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
             } else if (isTeacher) {
                 await teacherService.updateMyProfile(profile);
             }
-            alert("Đã cập nhật thông tin thành công!");
-            onClose();
+            showToast("✅ Đã cập nhật thông tin thành công!");
+            // Đợi 1 lát cho user thấy toast rồi mới đóng modal
+            setTimeout(() => onClose(), 1500);
         } catch (err) {
-            alert("Cập nhật thất bại: " + err.message);
+            showToast("Cập nhật thất bại: " + err.message, "error");
         }
     };
 
@@ -57,6 +64,12 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
 
     return (
         <div className="modal-overlay">
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
             <div className="modal-content profile-modal">
                 <div className="modal-header">
                     <h3>{isEditMode ? "Chỉnh sửa hồ sơ" : "Chi tiết hồ sơ"}</h3>

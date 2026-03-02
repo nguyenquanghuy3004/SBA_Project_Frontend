@@ -19,7 +19,7 @@ const Login = ({ onLoginSuccess, toggleAuth }) => {
             const data = await authService.login(formData.username, formData.password);
             onLoginSuccess(data);
         } catch (err) {
-            setError(err.message || "Login failed. Please check your credentials.");
+            setError(err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
         } finally {
             setLoading(false);
         }
@@ -27,39 +27,39 @@ const Login = ({ onLoginSuccess, toggleAuth }) => {
 
     return (
         <div className="auth-card">
-            <h2>Login</h2>
+            <h2>Đăng nhập</h2>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Username</label>
+                    <label>Tên đăng nhập</label>
                     <input
                         type="text"
                         name="username"
                         value={formData.username}
                         onChange={handleChange}
                         required
-                        placeholder="Enter your username"
+                        placeholder="Nhập tên đăng nhập"
                     />
                 </div>
                 <div className="form-group">
-                    <label>Password</label>
+                    <label>Mật khẩu</label>
                     <input
                         type="password"
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        placeholder="Enter your password"
+                        placeholder="Nhập mật khẩu"
                     />
                 </div>
                 <button type="submit" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                 </button>
             </form>
             <p className="auth-footer">
-                Don't have an account?{" "}
+                Chưa có tài khoản?{" "}
                 <span className="toggle-link" onClick={toggleAuth}>
-                    Register here
+                    Đăng ký ngay
                 </span>
             </p>
         </div>

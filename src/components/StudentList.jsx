@@ -20,6 +20,12 @@ const StudentList = ({ user }) => {
     });
 
     const [editingStudent, setEditingStudent] = useState(null);
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const isAdminOrTeacher = user && (user.roles.includes("ROLE_ADMIN") || user.roles.includes("ROLE_TEACHER"));
 
@@ -30,7 +36,7 @@ const StudentList = ({ user }) => {
             const data = await studentService.getAllStudents();
             setStudents(data);
         } catch (err) {
-            setError("Failed to fetch students. " + (err.message || ""));
+            setError("Không thể tải danh sách sinh viên. " + (err.message || ""));
         } finally {
             setLoading(false);
         }
@@ -57,8 +63,9 @@ const StudentList = ({ user }) => {
                 gpa: ""
             });
             fetchStudents();
+            showToast("Đã thêm sinh viên thành công!");
         } catch (err) {
-            alert(err.message);
+            showToast(err.message, "error");
         }
     };
 
@@ -74,19 +81,20 @@ const StudentList = ({ user }) => {
             setIsEditModalOpen(false);
             setEditingStudent(null);
             fetchStudents();
-            alert("Student updated successfully!");
+            showToast("Cập nhật sinh viên thành công!");
         } catch (err) {
-            alert("Update failed: " + err.message);
+            showToast("Cập nhật thất bại: " + err.message, "error");
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this student?")) {
+        if (window.confirm("Bạn có chắc chắn muốn xóa sinh viên này?")) {
             try {
                 await studentService.deleteStudent(id);
                 setStudents(students.filter(s => s.studentId !== id));
+                showToast("🗑️ Đã xóa sinh viên!");
             } catch (err) {
-                alert("Failed to delete student: " + err.message);
+                showToast("Xóa sinh viên thất bại: " + err.message, "error");
             }
         }
     };
@@ -94,29 +102,35 @@ const StudentList = ({ user }) => {
     if (!isAdminOrTeacher) {
         return (
             <div className="permission-denied">
-                <h3>Access Denied</h3>
-                <p>Only Admins and Teachers can view the student list.</p>
+                <h3>Không có quyền truy cập</h3>
+                <p>Chỉ Quản trị viên và Giáo viên mới có thể xem danh sách sinh viên.</p>
             </div>
         );
     }
 
     return (
         <div className="student-list-container">
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
             <div className="list-header">
-                <h2>Student Registry</h2>
+                <h2>Danh sách Sinh viên</h2>
                 <div className="header-actions">
                     <input
                         type="text"
-                        placeholder="Search by name or ID..."
+                        placeholder="Tìm theo tên hoặc MSSV..."
                         className="search-input"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <button className="add-btn" onClick={() => setIsModalOpen(true)}>
-                        + Add Student
+                        + Thêm sinh viên
                     </button>
                     <button className="refresh-btn" onClick={fetchStudents} disabled={loading}>
-                        {loading ? "Refreshing..." : "Refresh List"}
+                        {loading ? "Đang tải..." : "Làm mới"}
                     </button>
                 </div>
             </div>
@@ -125,11 +139,11 @@ const StudentList = ({ user }) => {
             {isModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>Add New Student</h3>
+                        <h3>Thêm sinh viên mới</h3>
                         <form onSubmit={handleCreateStudent}>
                             <input
                                 type="text"
-                                placeholder="Student Name"
+                                placeholder="Họ và tên"
                                 value={newStudent.studentName}
                                 onChange={(e) => setNewStudent({ ...newStudent, studentName: e.target.value })}
                                 required
@@ -139,9 +153,9 @@ const StudentList = ({ user }) => {
                                 onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
                                 required
                             >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                                <option value="Other">Khác</option>
                             </select>
                             <input
                                 type="date"
@@ -158,14 +172,14 @@ const StudentList = ({ user }) => {
                             />
                             <input
                                 type="text"
-                                placeholder="Phone (10 digits)"
+                                placeholder="Số điện thoại (10 số)"
                                 value={newStudent.studentPhone}
                                 onChange={(e) => setNewStudent({ ...newStudent, studentPhone: e.target.value })}
                                 required
                             />
                             <input
                                 type="text"
-                                placeholder="Major"
+                                placeholder="Chuyên ngành"
                                 value={newStudent.major}
                                 onChange={(e) => setNewStudent({ ...newStudent, major: e.target.value })}
                                 required
@@ -173,14 +187,14 @@ const StudentList = ({ user }) => {
                             <input
                                 type="number"
                                 step="0.1"
-                                placeholder="GPA (0-10)"
+                                placeholder="Điểm trung bình (0-10)"
                                 value={newStudent.gpa}
                                 onChange={(e) => setNewStudent({ ...newStudent, gpa: e.target.value })}
                                 required
                             />
                             <div className="modal-buttons">
-                                <button type="submit" className="save-btn">Save</button>
-                                <button type="button" className="cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                <button type="submit" className="save-btn">Lưu</button>
+                                <button type="button" className="cancel-btn" onClick={() => setIsModalOpen(false)}>Hủy</button>
                             </div>
                         </form>
                     </div>
@@ -192,7 +206,7 @@ const StudentList = ({ user }) => {
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h3>Edit Student: {editingStudent.studentId}</h3>
+                            <h3>Chỉnh sửa sinh viên: {editingStudent.studentId}</h3>
                             <button className="close-x" onClick={() => setIsEditModalOpen(false)}>&times;</button>
                         </div>
                         <form onSubmit={handleUpdateStudent}>
@@ -264,8 +278,8 @@ const StudentList = ({ user }) => {
                                 />
                             </div>
                             <div className="modal-buttons">
-                                <button type="submit" className="save-btn">Update</button>
-                                <button type="button" className="cancel-btn" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                                <button type="submit" className="save-btn">Cập nhật</button>
+                                <button type="button" className="cancel-btn" onClick={() => setIsEditModalOpen(false)}>Hủy</button>
                             </div>
                         </form>
                     </div>
@@ -274,7 +288,7 @@ const StudentList = ({ user }) => {
 
             {error && <div className="error-message">{error}</div>}
 
-            {loading && <div className="loading-spinner">Loading students...</div>}
+            {loading && <div className="loading-spinner">Đang tải sinh viên...</div>}
 
             {!loading && (
                 <div className="table-responsive">
@@ -282,14 +296,14 @@ const StudentList = ({ user }) => {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Name</th>
-                                <th>Gender</th>
-                                <th>Birth Date</th>
+                                <th>Họ và tên</th>
+                                <th>Giới tính</th>
+                                <th>Ngày sinh</th>
                                 <th>Email</th>
-                                <th>Phone</th>
-                                <th>Major</th>
+                                <th>Điện thoại</th>
+                                <th>Chuyên ngành</th>
                                 <th>GPA</th>
-                                {user.roles.includes("ROLE_ADMIN") && <th>Actions</th>}
+                                {user.roles.includes("ROLE_ADMIN") && <th>Thao tác</th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -316,13 +330,13 @@ const StudentList = ({ user }) => {
                                                         style={{ padding: '4px 8px', fontSize: '0.8rem', background: '#4f46e5' }}
                                                         onClick={() => handleEditClick(student)}
                                                     >
-                                                        Edit
+                                                        Sửa
                                                     </button>
                                                     <button
                                                         className="delete-btn"
                                                         onClick={() => handleDelete(student.studentId)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </button>
                                                 </div>
                                             </td>
@@ -331,7 +345,7 @@ const StudentList = ({ user }) => {
                                 ))}
                         </tbody>
                     </table>
-                    {students.length === 0 && <p className="no-data">No students found.</p>}
+                    {students.length === 0 && <p className="no-data">Không có sinh viên nào.</p>}
                 </div>
             )}
         </div>

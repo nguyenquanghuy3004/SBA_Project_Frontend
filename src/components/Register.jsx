@@ -24,7 +24,7 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
         setMessage("");
 
         if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match");
+            setError("Mật khẩu xác nhận không khớp");
             return;
         }
 
@@ -38,12 +38,12 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
                 role: ["user"]
             };
             await authService.register(userData);
-            setMessage("Registration successful! Redirecting to login...");
+            setMessage("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
             setTimeout(() => {
                 toggleAuth();
             }, 2000);
         } catch (err) {
-            setError(err.message || "Registration failed. Username or email might be taken.");
+            setError(err.message || "Đăng ký thất bại. Tên đăng nhập hoặc email đã được dùng.");
         } finally {
             setLoading(false);
         }
@@ -51,19 +51,19 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
 
     return (
         <div className="auth-card">
-            <h2>Register</h2>
+            <h2>Đăng ký</h2>
             {error && <div className="error-message">{error}</div>}
             {message && <div className="success-message">{message}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Username</label>
+                    <label>Tên đăng nhập</label>
                     <input
                         type="text"
                         name="username"
                         value={formData.username}
                         onChange={handleChange}
                         required
-                        placeholder="Choose a username"
+                        placeholder="Chọn tên đăng nhập"
                     />
                 </div>
                 <div className="form-group">
@@ -74,50 +74,50 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        placeholder="Enter your email"
+                        placeholder="Nhập địa chỉ email"
                     />
                 </div>
                 <div className="form-group">
-                    <label>Password</label>
+                    <label>Mật khẩu</label>
                     <input
                         type="password"
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        placeholder="Create a password"
+                        placeholder="Tạo mật khẩu"
                     />
                 </div>
                 <div className="form-group">
-                    <label>Confirm Password</label>
+                    <label>Xác nhận mật khẩu</label>
                     <input
                         type="password"
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         required
-                        placeholder="Confirm your password"
+                        placeholder="Nhập lại mật khẩu"
                     />
                 </div>
                 <div className="form-group">
-                    <label>Phone Number</label>
+                    <label>Số điện thoại</label>
                     <input
                         type="text"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
                         required
-                        placeholder="Enter your phone number"
+                        placeholder="Nhập số điện thoại"
                     />
                 </div>
                 <button type="submit" disabled={loading}>
-                    {loading ? "Registering..." : "Register"}
+                    {loading ? "Đang đăng ký..." : "Đăng ký"}
                 </button>
             </form>
             <p className="auth-footer">
-                Already have an account?{" "}
+                Đã có tài khoản?{" "}
                 <span className="toggle-link" onClick={toggleAuth}>
-                    Login here
+                    Đăng nhập ngay
                 </span>
             </p>
         </div>

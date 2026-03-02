@@ -6,6 +6,12 @@ const CourseManagement = () => {
     const [formData, setFormData] = useState({ courseCode: "", name: "", creadits: 3 });
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => { fetchCourses(); }, []);
 
@@ -19,15 +25,17 @@ const CourseManagement = () => {
         try {
             if (editingId) {
                 await courseService.updateCourse(editingId, formData);
-                alert("Course updated!");
+                showToast("✅ Cập nhật môn học thành công!");
             } else {
                 await courseService.createCourse(formData);
-                alert("Course added!");
+                showToast("✅ Thêm môn học thành công!");
             }
             setFormData({ courseCode: "", name: "", creadits: 3 });
             setEditingId(null);
             fetchCourses();
-        } catch (err) { alert(err.message); }
+        } catch (err) {
+            showToast(err.message, "error");
+        }
     };
 
     const handleEdit = (course) => {
@@ -45,42 +53,53 @@ const CourseManagement = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Delete this course?")) {
-            await courseService.deleteCourse(id);
-            fetchCourses();
+        if (window.confirm("Bạn có chắc muốn xóa môn học này?")) {
+            try {
+                await courseService.deleteCourse(id);
+                fetchCourses();
+                showToast("🗑️ Đã xóa môn học!");
+            } catch (err) {
+                showToast("Xóa thất bại: " + err.message, "error");
+            }
         }
     };
 
     return (
         <div className="management-section">
-            <h3>Course Management</h3>
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
+            <h3>Quản lý Môn học</h3>
             <form className="admin-form" onSubmit={handleSubmit}>
                 <input
-                    placeholder="Code (e.g. IT101)"
+                    placeholder="Mã môn (VD: IT101)"
                     value={formData.courseCode}
                     onChange={e => setFormData({ ...formData, courseCode: e.target.value })}
                     required
                 />
                 <input
-                    placeholder="Course Name"
+                    placeholder="Tên môn học"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     required
                 />
                 <input
                     type="number"
-                    placeholder="Credits"
+                    placeholder="Số tín chỉ"
                     value={formData.creadits}
                     onChange={e => setFormData({ ...formData, creadits: parseInt(e.target.value) })}
                     required
                 />
                 <div className="header-actions">
                     <button type="submit" className={editingId ? "save-btn" : "add-btn"}>
-                        {editingId ? "Update Course" : "Add Course"}
+                        {editingId ? "Cập nhật môn học" : "Thêm môn học"}
                     </button>
                     {editingId && (
                         <button type="button" className="cancel-btn" onClick={handleCancel}>
-                            Cancel
+                            Hủy
                         </button>
                     )}
                 </div>
@@ -89,10 +108,10 @@ const CourseManagement = () => {
             <table className="student-table">
                 <thead>
                     <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Credits</th>
-                        <th>Action</th>
+                        <th>Mã môn</th>
+                        <th>Tên môn</th>
+                        <th>Tín chỉ</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,8 +122,8 @@ const CourseManagement = () => {
                             <td>{c.creadits}</td>
                             <td>
                                 <div className="header-actions">
-                                    <button onClick={() => handleEdit(c)} className="refresh-btn" style={{ padding: '6px 12px' }}>Edit</button>
-                                    <button onClick={() => handleDelete(c.id)} className="delete-btn">Delete</button>
+                                    <button onClick={() => handleEdit(c)} className="refresh-btn" style={{ padding: '6px 12px' }}>Sửa</button>
+                                    <button onClick={() => handleDelete(c.id)} className="delete-btn">Xóa</button>
                                 </div>
                             </td>
                         </tr>

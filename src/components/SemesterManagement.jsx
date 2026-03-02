@@ -5,6 +5,12 @@ const SemesterManagement = () => {
     const [semesters, setSemesters] = useState([]);
     const [formData, setFormData] = useState({ name: "", status: "OPEN_REGISTRATION" });
     const [editingId, setEditingId] = useState(null);
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => { fetchSemesters(); }, []);
 
@@ -21,15 +27,17 @@ const SemesterManagement = () => {
             if (editingId) {
                 // Nếu có ID đang sửa thì gọi API Update
                 await semesterService.updateSemester(editingId, formData);
-                alert("Semester updated!");
+                showToast(" Cập nhật học kỳ thành công!");
             } else {
                 // Ngược lại thì gọi API Create
                 await semesterService.createSemester(formData);
-                alert("Semester created!");
+                showToast(" Tạo học kỳ mới thành công!");
             }
             handleCancel(); // Reset form
             fetchSemesters(); // Load lại danh sách
-        } catch (err) { alert(err.message); }
+        } catch (err) {
+            showToast(err.message, "error");
+        }
     };
 
     const handleCancel = () => {
@@ -43,20 +51,29 @@ const SemesterManagement = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Delete this semester?")) {
+        if (window.confirm("Bạn có chắc muốn xóa học kỳ này?")) {
             try {
                 await semesterService.deleteSemester(id);
                 fetchSemesters();
-            } catch (err) { alert(err.message); }
+                showToast("🗑️ Đã xóa học kỳ!");
+            } catch (err) {
+                showToast(err.message, "error");
+            }
         }
     };
 
     return (
         <div className="management-section">
-            <h3>Semester Management</h3>
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
+            <h3>Quản lý Học kỳ</h3>
             <form className="admin-form" onSubmit={handleSubmit}>
                 <input
-                    placeholder="Semester Name (e.g. Fall 2024)"
+                    placeholder="Tên học kỳ (VD: Học kỳ 1 - 2024)"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     required
@@ -65,17 +82,17 @@ const SemesterManagement = () => {
                     value={formData.status}
                     onChange={e => setFormData({ ...formData, status: e.target.value })}
                 >
-                    <option value="OPEN_REGISTRATION">Open Registration</option>
-                    <option value="ONGOING">Ongoing</option>
-                    <option value="FINISHED">Finished</option>
+                    <option value="OPEN_REGISTRATION">Mở đăng ký</option>
+                    <option value="ONGOING">Đang diễn ra</option>
+                    <option value="FINISHED">Đã kết thúc</option>
                 </select>
                 <div className="header-actions">
                     <button type="submit" className={editingId ? "save-btn" : "add-btn"}>
-                        {editingId ? "Update Semester" : "Create Semester"}
+                        {editingId ? "Cập nhật học kỳ" : "Tạo học kỳ"}
                     </button>
                     {editingId && (
                         <button type="button" className="cancel-btn" onClick={handleCancel}>
-                            Cancel
+                            Hủy
                         </button>
                     )}
                 </div>
@@ -85,9 +102,9 @@ const SemesterManagement = () => {
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>Tên</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,8 +119,8 @@ const SemesterManagement = () => {
                             </td>
                             <td>
                                 <div className="header-actions">
-                                    <button onClick={() => handleEdit(s)} className="refresh-btn" style={{ padding: '6px 12px' }}>Edit</button>
-                                    <button onClick={() => handleDelete(s.id)} className="delete-btn">Delete</button>
+                                    <button onClick={() => handleEdit(s)} className="refresh-btn" style={{ padding: '6px 12px' }}>Sửa</button>
+                                    <button onClick={() => handleDelete(s.id)} className="delete-btn">Xóa</button>
                                 </div>
                             </td>
                         </tr>

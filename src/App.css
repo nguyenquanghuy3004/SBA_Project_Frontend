@@ -435,31 +435,95 @@ h2 {
 /* Admin Dashboard Layout */
 .admin-dashboard {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 220px 1fr;
     gap: 2rem;
 }
 
 .admin-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 4px;
+    padding: 0.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
 }
 
-.admin-sidebar button {
+/* Giữ nguyên class cũ .admin-sidebar button để không phá code khác */
+.admin-sidebar button,
+.admin-sidebar-btn {
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: 0.7rem 1rem;
     background: transparent;
     border: none;
-    color: #94a3b8;
-    border-radius: 8px;
+    color: #64748b;
+    border-radius: 10px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    width: 100%;
+    letter-spacing: 0.01em;
+}
+
+.admin-sidebar button:hover,
+.admin-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+.admin-sidebar button.active,
+.admin-sidebar-btn.active {
+    background: rgba(99, 102, 241, 0.12);
+    color: #a5b4fc;
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.25);
+}
+
+/* Active indicator bar bên trái */
+.admin-sidebar-btn.active::before {
+    content: '';
+    position: absolute;
+    left: -0.5rem;
+    top: 20%;
+    height: 60%;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--primary);
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+}
+
+/* Icon bọc trong span */
+.sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
     transition: all 0.2s;
 }
 
-.admin-sidebar button.active {
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--primary);
-    font-weight: 600;
+.admin-sidebar-btn:hover .sidebar-icon {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar-btn.active .sidebar-icon {
+    background: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+}
+
+.sidebar-label {
+    flex: 1;
 }
 
 .placeholder-section {
@@ -613,6 +677,36 @@ h2 {
     font-weight: 700;
     color: var(--primary);
 }
+
+/* Semester UI Upgrades */
+.semester-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    color: #a5b4fc;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 6px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    text-transform: capitalize;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.semester-badge-dashboard {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin-left: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
 
 /* Admin Forms */
 .admin-form {
@@ -975,6 +1069,18 @@ h2 {
     padding: 8px;
     animation: dropdownPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     backdrop-filter: blur(12px);
+}
+
+/* Cầu nối để khi di chuột từ nút xuống menu không bị đóng */
+.dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    /* Lớn hơn 12px gap để đảm bảo kín */
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background: transparent;
 }
 
 @keyframes dropdownPop {
@@ -2003,4 +2109,551 @@ h2 {
 
 .send-notif-btn-modern:hover svg {
     transform: translateX(4px) translateY(-4px);
+}
+
+/* ===================================================
+   ADMIN NOTIFICATION – GỬI THÔNG BÁO TỚI GIÁO VIÊN
+   =================================================== */
+
+.admin-notif-page {
+    position: relative;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Toast */
+.admin-toast {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: slideInRight 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 420px;
+}
+
+.admin-toast.success {
+    background: linear-gradient(135deg, #064e3b, #065f46);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+
+.admin-toast.error {
+    background: linear-gradient(135deg, #7f1d1d, #991b1b);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.admin-toast button {
+    background: transparent;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.admin-toast button:hover {
+    opacity: 1;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Layout 2 cột */
+.admin-notif-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* ---- SIDEBAR (danh sách GV) ---- */
+.admin-notif-sidebar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header-notif {
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.sidebar-header-notif h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #e2e8f0;
+    margin-bottom: 0.75rem;
+    background: none;
+    -webkit-text-fill-color: #e2e8f0;
+}
+
+.notif-search {
+    width: 100%;
+    padding: 9px 14px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.notif-search:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.notif-search::placeholder {
+    color: #4b5563;
+}
+
+.teacher-target-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem;
+}
+
+.teacher-target-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.teacher-target-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.teacher-target-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.target-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 0.75rem;
+    color: #4b5563;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.target-divider::before,
+.target-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.teacher-target-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.teacher-target-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.teacher-target-item.selected {
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.teacher-target-item.broadcast.selected {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.teacher-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.broadcast-avatar {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    font-size: 1rem;
+}
+
+.teacher-target-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.teacher-target-info strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.teacher-target-info span {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.check-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.teacher-target-item.broadcast.selected .check-badge {
+    background: #f59e0b;
+}
+
+/* ---- COMPOSE (Form soạn thảo) ---- */
+.admin-notif-compose {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.compose-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.compose-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 0.75rem;
+    background: none;
+    -webkit-text-fill-color: white;
+}
+
+.recipient-badge {
+    font-size: 0.875rem;
+}
+
+.badge-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    font-weight: 500;
+}
+
+.badge-one {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    font-weight: 500;
+}
+
+.notif-compose-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.notif-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.notif-form-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.notif-form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.notif-form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.notif-form-group textarea {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 160px;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.notif-form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.notif-form-group input::placeholder,
+.notif-form-group textarea::placeholder {
+    color: #374151;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 0.75rem;
+    color: #4b5563;
+    margin-top: 2px;
+}
+
+.compose-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.compose-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #64748b;
+    font-size: 0.82rem;
+    max-width: 360px;
+    line-height: 1.5;
+}
+
+.compose-hint svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.compose-buttons {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.clear-btn {
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.clear-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.clear-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.send-notif-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.send-notif-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.45);
+    filter: brightness(1.1);
+}
+
+.send-notif-btn:active {
+    transform: translateY(0);
+}
+
+.send-notif-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading spinner nhỏ */
+.spinner-small {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-state {
+    text-align: center;
+    padding: 2rem;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+/* Toast Notification System */
+.toast-notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    z-index: 9999;
+    min-width: 320px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-notification.success {
+    background: rgba(16, 185, 129, 0.95);
+    color: white;
+}
+
+.toast-notification.error {
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+}
+
+.toast-msg {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.toast-close:hover {
+    opacity: 1;
 }

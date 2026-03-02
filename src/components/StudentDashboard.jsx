@@ -11,7 +11,12 @@ const StudentDashboard = ({ user }) => {
     const [myEnrollments, setMyEnrollments] = useState([]);
     const [availableClasses, setAvailableClasses] = useState([]);
     const [notifications, setNotifications] = useState([]);
+    const [toast, setToast] = useState(null);
 
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
     const [showMajorModal, setShowMajorModal] = useState(false);
     const [selectedMajor, setSelectedMajor] = useState("");
 
@@ -59,7 +64,7 @@ const StudentDashboard = ({ user }) => {
     };
 
     const handleUpdateMajor = async () => {
-        if (!selectedMajor) return alert("Vui lòng chọn chuyên ngành!");
+        if (!selectedMajor) return showToast("Vui lòng chọn chuyên ngành!", "error");
         try {
             const updatedProfile = { ...profile, major: selectedMajor };
             await studentService.updateStudent(profile.studentId, updatedProfile);
@@ -68,23 +73,23 @@ const StudentDashboard = ({ user }) => {
             setProfile(updatedProfile);
             setShowMajorModal(false);
 
-            alert("Đã cập nhật chuyên ngành thành công!");
+            showToast("✨ Đã cập nhật chuyên ngành thành công!");
             fetchData(); // Đồng bộ lại với server
         } catch (err) {
-            alert("Lỗi: " + (err.message || "Không thể cập nhật"));
+            showToast("Lỗi: " + (err.message || "Không thể cập nhật"), "error");
         }
     };
 
     const handleEnroll = async (classId) => {
         if (!profile?.major || profile.major === "None") {
-            return alert("Vui lòng cập nhật chuyên ngành trước khi đăng ký môn học!");
+            return showToast("Vui lòng cập nhật chuyên ngành trước khi đăng ký môn học!", "error");
         }
         try {
             await enrollmentService.enroll(profile.studentId, classId);
-            alert("Đăng ký môn học thành công!");
+            showToast("✅ Đăng ký môn học thành công!");
             fetchData();
         } catch (err) {
-            alert(err.message || "Lỗi khi đăng ký");
+            showToast(err.message || "Lỗi khi đăng ký", "error");
         }
     };
 
@@ -92,10 +97,10 @@ const StudentDashboard = ({ user }) => {
         if (!window.confirm("Bạn có chắc chắn muốn hủy đăng ký môn học này?")) return;
         try {
             await enrollmentService.cancelEnrollment(profile.studentId, classId);
-            alert("Đã hủy đơn đăng ký.");
+            showToast("🗑️ Đã hủy đơn đăng ký.");
             fetchData();
         } catch (err) {
-            alert(err.message || "Lỗi khi hủy đăng ký");
+            showToast(err.message || "Lỗi khi hủy đăng ký", "error");
         }
     };
 
@@ -108,9 +113,67 @@ const StudentDashboard = ({ user }) => {
         }
     };
 
-    // Tính toán thông kê
-    const totalCredits = myEnrollments.reduce((sum, en) => sum + (en.subjectClass.course.creadits || 0), 0);
-    const gpa = profile?.gpa || 0.0;
+    // --- PHẦN TÍNH TOÁN DỄ HIỂU ---
+    // --- PHẦN TÍNH TOÁN (ĐÃ SỬA LỖI VIẾT HOA/THƯỜNG HỌC KỲ) ---
+
+    // 1. Tìm Học kỳ mới nhất (Hệ thống lấy HK có ID lớn nhất làm HK hiện tại)
+    let maxId = 0;
+    let tenHkSearch = "";
+    for (let i = 0; i < myEnrollments.length; i++) {
+        const hk = myEnrollments[i].subjectClass.semester;
+        if (hk && Number(hk.id) > maxId) {
+            maxId = Number(hk.id);
+            tenHkSearch = hk.name.trim().toLowerCase(); // Lấy tên viết thường để so sánh
+        }
+    }
+    const tenHKHienTai = (myEnrollments.find(e => e.subjectClass.semester.id === maxId)?.subjectClass.semester.name) || "Chưa rõ";
+
+    // 2. Tính GPA
+    let monKyNay = [];
+    let soMonCoDiemKyNay = 0;
+    let tongDiemNhanTinChiKyNay = 0;
+    let tongTinChiKyNay = 0;
+    let tongDiemTichLuy = 0;
+    let tongTinChiTichLuy = 0;
+
+    for (let i = 0; i < myEnrollments.length; i++) {
+        const en = myEnrollments[i];
+        const hocky = en.subjectClass.semester;
+
+        // Tích lũy (Tất cả môn có điểm)
+        if (en.totalScore != null) {
+            const tc = en.subjectClass.course.creadits || 0;
+            tongDiemTichLuy += (en.totalScore * tc);
+            tongTinChiTichLuy += tc;
+        }
+
+        // Học kỳ này: Match theo TÊN (không phân biệt hoa thường) để sửa lỗi dữ liệu của bạn
+        if (hocky && hocky.name.trim().toLowerCase() === tenHkSearch) {
+            monKyNay.push(en);
+            if (en.totalScore != null) {
+                soMonCoDiemKyNay++;
+                const tc = en.subjectClass.course.creadits || 0;
+                tongDiemNhanTinChiKyNay += (en.totalScore * tc);
+                tongTinChiKyNay += tc;
+            }
+        }
+    }
+
+    const totalCredits = tongTinChiTichLuy;
+    const cgpa = tongTinChiTichLuy > 0 ? (tongDiemTichLuy / tongTinChiTichLuy) : 0;
+    const allTermEnrollments = monKyNay;
+    const hasEnoughSubjects = (allTermEnrollments.length >= 5);
+
+    let termGpaDisplay = "0.00";
+    if (allTermEnrollments.length < 5) {
+        termGpaDisplay = `Thiếu môn (${allTermEnrollments.length}/5)`;
+    } else if (soMonCoDiemKyNay < allTermEnrollments.length) {
+        termGpaDisplay = "Đang chấm...";
+    } else {
+        const giaTriGPA = tongTinChiKyNay > 0 ? (tongDiemNhanTinChiKyNay / tongTinChiKyNay) : 0;
+        termGpaDisplay = giaTriGPA.toFixed(2);
+    }
+
 
     const majors = [
         "Kỹ thuật phần mềm",
@@ -140,6 +203,12 @@ const StudentDashboard = ({ user }) => {
 
     return (
         <div className="student-dashboard">
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
             <div className="tab-navigation">
                 <button className={activeTab === "overview" ? "active" : ""} onClick={() => setActiveTab("overview")}>
                     <Icons.Home /> Tổng quan
@@ -185,29 +254,29 @@ const StudentDashboard = ({ user }) => {
                                 <div className="stat-card-modern p-gradient">
                                     <div className="card-icon"><Icons.User /></div>
                                     <div className="card-info">
-                                        <span className="label">Họ tên</span>
+                                        <span className="label">Học viên</span>
                                         <span className="value">{profile?.studentName}</span>
                                     </div>
                                 </div>
                                 <div className="stat-card-modern s-gradient">
-                                    <div className="card-icon"><Icons.Id /></div>
-                                    <div className="card-info">
-                                        <span className="label">MSSV</span>
-                                        <span className="value">{profile?.studentId}</span>
-                                    </div>
-                                </div>
-                                <div className="stat-card-modern t-gradient">
                                     <div className="card-icon"><Icons.Book /></div>
                                     <div className="card-info">
                                         <span className="label">Tín chỉ</span>
-                                        <span className="value">{totalCredits}</span>
+                                        <span className="value">{totalCredits} TC</span>
+                                    </div>
+                                </div>
+                                <div className="stat-card-modern t-gradient">
+                                    <div className="card-icon"><Icons.Chart /></div>
+                                    <div className="card-info">
+                                        <span className="label">GPA Học kỳ <span className="semester-badge-dashboard">{tenHKHienTai}</span></span>
+                                        <span className={`value ${!hasEnoughSubjects ? 'warning-text' : ''}`}>{termGpaDisplay}</span>
                                     </div>
                                 </div>
                                 <div className="stat-card-modern q-gradient">
                                     <div className="card-icon"><Icons.Award /></div>
                                     <div className="card-info">
-                                        <span className="label">GPA</span>
-                                        <span className="value">{gpa.toFixed(2)}</span>
+                                        <span className="label">GPA Tích lũy</span>
+                                        <span className="value highlight-gold">{cgpa.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -307,7 +376,13 @@ const StudentDashboard = ({ user }) => {
                     {activeTab === "register" && (
                         <div className="registration-section">
                             <div className="section-header">
-                                <h3><Icons.Book /> Danh sách lớp học đang mở</h3>
+                                <div>
+                                    <h3><Icons.Book /> Danh sách lớp học đang mở</h3>
+                                    <p className={`reg-status ${allTermEnrollments.length < 5 ? 'incomplete' : 'complete'}`}>
+                                        Tiến độ đăng ký: <strong>{allTermEnrollments.length}/5 môn</strong>
+                                        {allTermEnrollments.length < 5 && <span className="reg-hint"> (Cần đăng ký thêm {5 - allTermEnrollments.length} môn để đủ điều kiện tính GPA)</span>}
+                                    </p>
+                                </div>
                                 <div className="semester-badge-modern">
                                     <span className="icon"><Icons.Clock /></span>
                                     <span>Học kỳ: <strong>Semester 2 - 2024</strong></span>
@@ -315,7 +390,11 @@ const StudentDashboard = ({ user }) => {
                             </div>
                             <div className="class-grid">
                                 {availableClasses.map(cls => {
-                                    const isEnrolled = myEnrollments.some(en => en.subjectClass.id === cls.id);
+                                    // Kiểm tra xem sinh viên đã đăng ký MÔN NÀY trong HỌC KỲ NÀY chưa
+                                    const isEnrolled = myEnrollments.some(en =>
+                                        en.subjectClass.course.id === cls.course.id &&
+                                        en.subjectClass.semester.id === cls.semester.id
+                                    );
                                     return (
                                         <div className="class-card-modern" key={cls.id}>
                                             <div className="card-top">
@@ -392,7 +471,6 @@ const StudentDashboard = ({ user }) => {
                         <div className="grades-section">
                             <div className="section-header">
                                 <h3>📊 Bảng điểm chi tiết</h3>
-                                <div className="gpa-badge">Tích lũy: {gpa.toFixed(2)}</div>
                             </div>
                             <table className="student-table">
                                 <thead>
@@ -406,9 +484,14 @@ const StudentDashboard = ({ user }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {myEnrollments.map(en => (
+                                    {[...myEnrollments].sort((a, b) => b.subjectClass.semester.id - a.subjectClass.semester.id).map(en => (
                                         <tr key={en.id}>
-                                            <td>{en.subjectClass.course.name}</td>
+                                            <td>
+                                                <div className="subject-name-cell">
+                                                    <strong>{en.subjectClass.course.name}</strong>
+                                                    <div className="semester-pill">{en.subjectClass.semester.name}</div>
+                                                </div>
+                                            </td>
                                             <td>{en.subjectClass.course.creadits}</td>
                                             <td>{en.attendanceScore || "-"}</td>
                                             <td>{en.midtermScore || "-"}</td>

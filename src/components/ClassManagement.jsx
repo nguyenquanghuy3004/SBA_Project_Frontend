@@ -18,6 +18,12 @@ const ClassManagement = () => {
         schedule: "",
         maxStudents: 40
     });
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         fetchData();
@@ -76,69 +82,80 @@ const ClassManagement = () => {
 
             if (editingId) {
                 await classService.updateClass(editingId, payload);
-                alert("Class updated!");
+                showToast("✅ Cập nhật lớp học thành công!");
             } else {
                 await classService.createClass(payload);
-                alert("Class created!");
+                showToast("✅ Mở lớp học thành công!");
             }
             handleCancel();
             fetchData();
-        } catch (err) { alert(err.message); }
+        } catch (err) {
+            showToast(err.message, "error");
+        }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this class?")) {
+        if (window.confirm("Bạn có chắc muốn xóa lớp học này?")) {
             try {
                 await classService.deleteClass(id);
                 fetchData();
-            } catch (err) { alert(err.message); }
+                showToast("🗑️ Đã xóa lớp học!");
+            } catch (err) {
+                showToast(err.message, "error");
+            }
         }
     };
 
     return (
         <div className="management-section">
-            <h3>Class Management</h3>
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
+            <h3>Quản lý Lớp học</h3>
             <form className="admin-form" onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Course</label>
+                    <label>Môn học</label>
                     <select
                         value={formData.course.id}
                         onChange={e => setFormData({ ...formData, course: { id: e.target.value } })}
                         required
                     >
-                        <option value="">Select Course</option>
+                        <option value="">-- Chọn môn học --</option>
                         {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
 
                 <div className="form-group">
-                    <label>Semester</label>
+                    <label>Học kỳ</label>
                     <select
                         value={formData.semester.id}
                         onChange={e => setFormData({ ...formData, semester: { id: e.target.value } })}
                         required
                     >
-                        <option value="">Select Semester</option>
+                        <option value="">-- Chọn học kỳ --</option>
                         {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                 </div>
 
                 <div className="form-group">
-                    <label>Teacher</label>
+                    <label>Giáo viên</label>
                     <select
                         value={formData.teacher.id}
                         onChange={e => setFormData({ ...formData, teacher: { id: e.target.value } })}
                         required
                     >
-                        <option value="">Select Teacher</option>
+                        <option value="">-- Chọn giáo viên --</option>
                         {teachers.map(t => <option key={t.id} value={t.id}>{t.fullName}</option>)}
                     </select>
                 </div>
 
                 <div className="form-group">
-                    <label>Room</label>
+                    <label>Phòng học</label>
                     <input
-                        placeholder="e.g. A101"
+                        placeholder="VD: A101"
                         value={formData.room}
                         onChange={e => setFormData({ ...formData, room: e.target.value })}
                         required
@@ -146,9 +163,9 @@ const ClassManagement = () => {
                 </div>
 
                 <div className="form-group">
-                    <label>Schedule</label>
+                    <label>Lịch học</label>
                     <input
-                        placeholder="e.g. Mon 7:00"
+                        placeholder="VD: Thứ 2 07:00"
                         value={formData.schedule}
                         onChange={e => setFormData({ ...formData, schedule: e.target.value })}
                         required
@@ -159,11 +176,11 @@ const ClassManagement = () => {
                     <label style={{ visibility: 'hidden' }}>Action</label>
                     <div className="header-actions">
                         <button type="submit" className={editingId ? "save-btn" : "add-btn"} style={{ margin: 0, height: '48px', minWidth: '120px' }}>
-                            {editingId ? "Update Class" : "Open Class"}
+                            {editingId ? "Cập nhật lớp" : "Mở lớp mới"}
                         </button>
                         {editingId && (
                             <button type="button" className="cancel-btn" onClick={handleCancel} style={{ height: '48px' }}>
-                                Cancel
+                                Hủy
                             </button>
                         )}
                     </div>
@@ -173,12 +190,12 @@ const ClassManagement = () => {
             <table className="student-table">
                 <thead>
                     <tr>
-                        <th>Course</th>
-                        <th>Semester</th>
-                        <th>Teacher</th>
-                        <th>Room</th>
-                        <th>Schedule</th>
-                        <th>Action</th>
+                        <th>Môn học</th>
+                        <th>Học kỳ</th>
+                        <th>Giáo viên</th>
+                        <th>Phòng</th>
+                        <th>Lịch học</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -190,13 +207,13 @@ const ClassManagement = () => {
                                     {cls.semester?.name}
                                 </span>
                             </td>
-                            <td>{cls.teacher?.fullName || "TBA"}</td>
+                            <td>{cls.teacher?.fullName || "Chưa phân công"}</td>
                             <td>{cls.room}</td>
                             <td>{cls.schedule}</td>
                             <td>
                                 <div className="header-actions">
-                                    <button onClick={() => handleEdit(cls)} className="refresh-btn" style={{ padding: '6px 12px' }}>Edit</button>
-                                    <button onClick={() => handleDelete(cls.id)} className="delete-btn">Delete</button>
+                                    <button onClick={() => handleEdit(cls)} className="refresh-btn" style={{ padding: '6px 12px' }}>Sửa</button>
+                                    <button onClick={() => handleDelete(cls.id)} className="delete-btn">Xóa</button>
                                 </div>
                             </td>
                         </tr>

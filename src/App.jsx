@@ -61,7 +61,11 @@ function App() {
                     <h2 className="logo-text">EduFlow<span className="logo-dot">.</span></h2>
                 </div>
                 <div className="user-info">
-                    <div className="user-dropdown-container">
+                    <div
+                        className="user-dropdown-container"
+                        onMouseEnter={() => setIsDropdownOpen(true)}
+                        onMouseLeave={() => setIsDropdownOpen(false)}
+                    >
                         <div
                             className="user-trigger"
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import classService from "../services/classService";
 import enrollmentService from "../services/enrollmentService";
 import notificationService from "../services/notificationService";
+import "./TeacherDashboard.css";
 
 const TeacherDashboard = ({ user }) => {
     const [activeTab, setActiveTab] = useState("overview");
@@ -11,6 +12,12 @@ const TeacherDashboard = ({ user }) => {
     const [loading, setLoading] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [notifForm, setNotifForm] = useState({ title: "", message: "" });
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         fetchInitialData();
@@ -41,7 +48,7 @@ const TeacherDashboard = ({ user }) => {
             setActiveTab("grades");
         } catch (err) {
             console.error("Lỗi tải DS sinh viên:", err);
-            alert("Không thể tải danh sách sinh viên lớp này.");
+            showToast("Không thể tải danh sách sinh viên lớp này.", "error");
         } finally {
             setLoading(false);
         }
@@ -61,9 +68,9 @@ const TeacherDashboard = ({ user }) => {
                 midterm: student.midtermScore,
                 finalScore: student.finalScore
             });
-            alert("Đã cập nhật điểm cho sinh viên!");
+            showToast("✅ Đã cập nhật điểm thành công!");
         } catch (err) {
-            alert("Lỗi: " + err.message);
+            showToast("Lỗi: " + err.message, "error");
         }
     };
 
@@ -72,10 +79,10 @@ const TeacherDashboard = ({ user }) => {
         try {
             await classService.lockClass(selectedClass.id, true);
             setSelectedClass({ ...selectedClass, locked: true });
-            alert("Đã khóa điểm lớp học thành công!");
+            showToast("✅ Đã khóa điểm lớp học thành công!");
             fetchInitialData();
         } catch (err) {
-            alert(err.message);
+            showToast(err.message, "error");
         }
     };
 
@@ -83,10 +90,10 @@ const TeacherDashboard = ({ user }) => {
         e.preventDefault();
         try {
             await notificationService.notifyClass(selectedClass.id, notifForm.title, notifForm.message);
-            alert("Đã gửi thông báo tới cả lớp!");
+            showToast("✅ Đã gửi thông báo tới cả lớp!");
             setNotifForm({ title: "", message: "" });
         } catch (err) {
-            alert(err.message);
+            showToast(err.message, "error");
         }
     };
 
@@ -106,6 +113,12 @@ const TeacherDashboard = ({ user }) => {
 
     return (
         <div className="student-dashboard teacher-dashboard">
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
             <div className="tab-navigation">
                 <button className={activeTab === "overview" ? "active" : ""} onClick={() => setActiveTab("overview")}>
                     <Icons.Home /> Tổng quan

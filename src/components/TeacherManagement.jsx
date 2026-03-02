@@ -8,6 +8,12 @@ const TeacherManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const [newTeacher, setNewTeacher] = useState({
         username: "",
@@ -24,7 +30,7 @@ const TeacherManagement = () => {
             const data = await teacherService.getAllTeachers();
             setTeachers(data);
         } catch (err) {
-            setError("Failed to fetch teachers: " + err.message);
+            setError("Không thể tải danh sách giáo viên: " + err.message);
         } finally {
             setLoading(false);
         }
@@ -70,25 +76,26 @@ const TeacherManagement = () => {
                     department: newTeacher.department,
                     degree: newTeacher.degree
                 });
-                alert("Teacher updated!");
+                showToast("Cập nhật giáo viên thành công!");
             } else {
                 await teacherService.createTeacher(newTeacher);
-                alert("Teacher created!");
+                showToast("Tạo tài khoản giáo viên thành công!");
             }
             handleCloseModal();
             fetchTeachers();
         } catch (err) {
-            alert("Error: " + err.message);
+            showToast("Lỗi: " + err.message, "error");
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure? This will also delete the teacher's user account.")) {
+        if (window.confirm("Bạn có chắc chắn muốn xóa? Tài khoản người dùng của giáo viên này cũng sẽ bị xóa.")) {
             try {
                 await teacherService.deleteTeacher(id);
                 fetchTeachers();
+                showToast("🗑️ Đã xóa giáo viên!");
             } catch (err) {
-                alert("Delete failed: " + err.message);
+                showToast("Xóa thất bại: " + err.message, "error");
             }
         }
     };
@@ -100,33 +107,39 @@ const TeacherManagement = () => {
 
     return (
         <div className="student-list-container">
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    <span className="toast-msg">{toast.msg}</span>
+                    <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
             <div className="management-section">
                 <div className="list-header">
-                    <h3>Teacher Management</h3>
+                    <h3>Quản lý Giáo viên</h3>
                     <div className="header-actions">
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="Search by name..."
+                            placeholder="Tìm theo tên..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <button className="add-btn" onClick={() => setIsModalOpen(true)}>+ Add Teacher</button>
-                        <button className="refresh-btn" onClick={fetchTeachers}>Refresh</button>
+                        <button className="add-btn" onClick={() => setIsModalOpen(true)}>+ Thêm giáo viên</button>
+                        <button className="refresh-btn" onClick={fetchTeachers}>Làm mới</button>
                     </div>
                 </div>
 
                 {isModalOpen && (
                     <div className="modal-overlay">
                         <div className="modal-content">
-                            <h3>{editingId ? "Update Teacher Profile" : "Assign New Teacher Account"}</h3>
+                            <h3>{editingId ? "Cập nhật thông tin giáo viên" : "Tạo tài khoản giáo viên mới"}</h3>
                             <form onSubmit={handleSubmit} className="admin-modal-form">
                                 <div className="form-grid">
                                     <div className="section">
-                                        <h4>Account Details {editingId && "(Read Only)"}</h4>
+                                        <h4>Thông tin tài khoản {editingId && "(Chỉ đọc)"}</h4>
                                         <input
                                             type="text"
-                                            placeholder="Username"
+                                            placeholder="Tên đăng nhập"
                                             value={newTeacher.username}
                                             onChange={(e) => setNewTeacher({ ...newTeacher, username: e.target.value })}
                                             required
@@ -145,7 +158,7 @@ const TeacherManagement = () => {
                                         {!editingId && (
                                             <input
                                                 type="password"
-                                                placeholder="Initial Password"
+                                                placeholder="Mật khẩu khởi tạo"
                                                 value={newTeacher.password}
                                                 onChange={(e) => setNewTeacher({ ...newTeacher, password: e.target.value })}
                                                 required
@@ -153,17 +166,17 @@ const TeacherManagement = () => {
                                         )}
                                     </div>
                                     <div className="section">
-                                        <h4>Teacher Profile</h4>
+                                        <h4>Hồ sơ giáo viên</h4>
                                         <input
                                             type="text"
-                                            placeholder="Full Name"
+                                            placeholder="Họ và tên"
                                             value={newTeacher.fullName}
                                             onChange={(e) => setNewTeacher({ ...newTeacher, fullName: e.target.value })}
                                             required
                                         />
                                         <input
                                             type="text"
-                                            placeholder="Department"
+                                            placeholder="Khoa / Bộ môn"
                                             value={newTeacher.department}
                                             onChange={(e) => setNewTeacher({ ...newTeacher, department: e.target.value })}
                                             required
@@ -172,16 +185,16 @@ const TeacherManagement = () => {
                                             value={newTeacher.degree}
                                             onChange={(e) => setNewTeacher({ ...newTeacher, degree: e.target.value })}
                                         >
-                                            <option value="Bachelor">Bachelor</option>
-                                            <option value="Master">Master</option>
-                                            <option value="PhD">PhD</option>
-                                            <option value="Professor">Professor</option>
+                                            <option value="Bachelor">Cử nhân</option>
+                                            <option value="Master">Thạc sĩ</option>
+                                            <option value="PhD">Tiến sĩ</option>
+                                            <option value="Professor">Giáo sư</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div className="modal-buttons">
-                                    <button type="submit" className="save-btn">{editingId ? "Update" : "Create"} Teacher</button>
-                                    <button type="button" className="cancel-btn" onClick={handleCloseModal}>Cancel</button>
+                                    <button type="submit" className="save-btn">{editingId ? "Cập nhật" : "Tạo mới"} giáo viên</button>
+                                    <button type="button" className="cancel-btn" onClick={handleCloseModal}>Hủy</button>
                                 </div>
                             </form>
                         </div>
@@ -193,11 +206,11 @@ const TeacherManagement = () => {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Full Name</th>
-                                <th>Username</th>
-                                <th>Department</th>
-                                <th>Degree</th>
-                                <th>Actions</th>
+                                <th>Họ và tên</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Khoa / Bộ môn</th>
+                                <th>Trình độ</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -210,8 +223,8 @@ const TeacherManagement = () => {
                                     <td>{t.degree}</td>
                                     <td>
                                         <div className="header-actions">
-                                            <button className="refresh-btn" style={{ padding: '6px 12px' }} onClick={() => handleEdit(t)}>Edit</button>
-                                            <button className="delete-btn" onClick={() => handleDelete(t.id)}>Delete</button>
+                                            <button className="refresh-btn" style={{ padding: '6px 12px' }} onClick={() => handleEdit(t)}>Sửa</button>
+                                            <button className="delete-btn" onClick={() => handleDelete(t.id)}>Xóa</button>
                                         </div>
                                     </td>
                                 </tr>
