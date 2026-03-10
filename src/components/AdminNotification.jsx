@@ -106,7 +106,14 @@ const AdminNotification = () => {
                             className={`teacher-target-item broadcast ${selectedTarget === "all" ? "selected" : ""}`}
                             onClick={() => setSelectedTarget("all")}
                         >
-                            <div className="teacher-avatar broadcast-avatar">📢</div>
+                            <div className="teacher-avatar broadcast-avatar">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8Z" />
+                                    <path d="M10 8v8" />
+                                    <path d="M14 8v8" />
+                                    <path d="M6 8v8" />
+                                </svg>
+                            </div>
                             <div className="teacher-target-info">
                                 <strong>Tất cả giáo viên</strong>
                                 <span>{teachers.length} người nhận</span>
@@ -155,10 +162,18 @@ const AdminNotification = () => {
                         {/* Hiển thị người nhận đã chọn */}
                         <div className="recipient-badge">
                             {selectedTarget === "all" ? (
-                                <span className="badge-all">📢 Gửi tới: Tất cả giáo viên ({teachers.length} người)</span>
+                                <span className="badge-all">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                                        <path d="M18 8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8Z" />
+                                    </svg>
+                                    Gửi tới: Tất cả giáo viên ({teachers.length} người)
+                                </span>
                             ) : (
                                 <span className="badge-one">
-                                    👤 Gửi tới: <strong>{selectedTeacherInfo?.fullName}</strong>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                    Gửi tới: <strong>{selectedTeacherInfo?.fullName}</strong>
                                     &nbsp;· {selectedTeacherInfo?.department}
                                 </span>
                             )}

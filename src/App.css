@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 
 :root {
     --primary: #6366f1;
@@ -11,12 +11,18 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
     background-color: var(--bg);
     color: #f8fafc;
+    font-size: 15px;
+    /* Better scale for Plus Jakarta Sans */
+    line-height: 1.6;
 }
 
 .dashboard {
@@ -118,11 +124,15 @@ main {
 
 h1,
 h2 {
+    font-weight: 800;
     margin-bottom: 1.5rem;
-    background: linear-gradient(to right, #fff, #94a3b8);
+    letter-spacing: -0.05em;
+    /* Tighter for large text */
+    background: linear-gradient(to right, #ffffff, #94a3b8);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.1;
 }
 
 .student-list-container {
@@ -131,6 +141,16 @@ h2 {
     padding: 1.5rem;
     border: 1px solid var(--border);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.highlight-blue {
+    color: #60a5fa !important;
+    font-weight: 800;
+    text-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+}
+
+.bold {
+    font-weight: 700;
 }
 
 .list-header {
@@ -201,6 +221,8 @@ h2 {
     text-align: center;
     padding: 3rem;
     color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: -0.01em;
 }
 
 .permission-denied {
@@ -346,7 +368,14 @@ h2 {
 }
 
 /* Dashboards General */
-.student-dashboard,
+.student-dashboard {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
 .teacher-dashboard,
 .admin-dashboard {
     animation: fadeIn 0.4s ease-out;
@@ -355,10 +384,13 @@ h2 {
 /* Tabs */
 .tab-navigation {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    justify-content: center;
+    /* Center tabs for balance */
+    gap: 2rem;
+    /* Increased gap */
+    margin-bottom: 3rem;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 0.5rem;
+    padding: 1rem 0;
 }
 
 .tab-navigation button {
@@ -1138,6 +1170,17 @@ h2 {
     color: #818cf8;
 }
 
+.dropdown-menu button svg {
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.dropdown-menu button:hover svg {
+    opacity: 1;
+    color: #818cf8;
+    transform: scale(1.1);
+}
+
 .logout-item:hover {
     background: rgba(239, 68, 68, 0.1) !important;
     color: #f87171 !important;
@@ -1598,6 +1641,130 @@ h2 {
     font-weight: 600;
 }
 
+/* --- MODERN TABLE STYLES --- */
+.table-responsive-modern {
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 20px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 1.5rem;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+}
+
+/* --- PROFESSIONAL INTEGRATED TABLE STYLES --- */
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    margin-top: 1rem;
+}
+
+.student-table thead th {
+    text-align: left;
+    padding: 1.25rem 1rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.student-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.2s;
+}
+
+.student-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.student-table td {
+    padding: 1.25rem 1rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+.student-table .bold {
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.bold-text {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.subject-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+.semester-pill {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-transform: capitalize;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+
+.course-code-pill {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.course-info-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.course-info-cell strong {
+    color: #f1f5f9;
+    font-size: 1rem;
+}
+
+.credits-badge {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+}
+
+.table-icon-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #cbd5e1;
+}
+
+.table-icon-group svg {
+    color: #818cf8;
+    opacity: 0.8;
+}
+
+.empty-table {
+    text-align: center;
+    padding: 3rem !important;
+    color: #64748b;
+    font-style: italic;
+}
+
 .info-card-modern {
     background: rgba(30, 41, 59, 0.3);
     padding: 2rem;
@@ -1850,19 +2017,91 @@ h2 {
     border: 1px dashed var(--border);
 }
 
-/* --- DASHBOARD COMPONENTS --- */
 .section-header {
     display: flex;
+    flex-direction: row;
+    /* Switch back to row for horizontal distribution */
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header>div:first-child {
+    flex: 1;
+}
+
+.section-header h3,
+.overview-section h3,
+.registration-section h3,
+.schedule-section h3,
+.grades-section h3 {
+    display: flex;
     align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+    gap: 12px;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    background: linear-gradient(to right, #ffffff, #cbd5e1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+}
+
+.section-header h3 svg,
+.overview-section h3 svg,
+.registration-section h3 svg,
+.schedule-section h3 svg,
+.grades-section h3 svg {
+    color: var(--primary);
+    width: 26px;
+    height: 26px;
+    -webkit-text-fill-color: initial;
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4));
+}
+
+.reg-status {
+    margin: 0.5rem 0 1rem 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    width: fit-content;
+}
+
+.reg-status.incomplete {
+    border-color: rgba(244, 63, 94, 0.2);
+    background: rgba(244, 63, 94, 0.05);
+}
+
+.reg-status svg {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.reg-status strong {
+    color: white;
+    font-weight: 700;
+}
+
+.danger-highlight {
+    color: #f43f5e;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.9;
 }
 
 .registration-section {
     width: 100%;
-    margin-bottom: 3rem;
 }
 
 /* --- REGISTRATION SECTION ENHANCEMENTS --- */
@@ -1919,20 +2158,29 @@ h2 {
 }
 
 .status-enrolled {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(16, 185, 129, 0.08);
+    /* More subtle background */
     color: #10b981;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 99px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .class-card-modern h4 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
+    /* Larger from screenshot */
     color: white;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.4;
+    text-transform: lowercase;
+    /* Matches "khởi nghiệp" screenshot style */
 }
 
 .class-details-modern {
@@ -1943,11 +2191,25 @@ h2 {
 
 .class-details-modern p {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     color: #94a3b8;
+    /* Muted slate for values */
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+}
+
+.class-details-modern p strong {
+    color: #e2e8f0;
+    /* Near white for labels */
+    font-weight: 700;
+}
+
+.class-details-modern p span svg {
+    opacity: 0.6;
+    /* Subtle icons from screenshot */
+    width: 18px;
+    height: 18px;
 }
 
 .class-details-modern p span {
@@ -1987,15 +2249,51 @@ h2 {
 }
 
 .cancel-enroll-btn-modern {
-    background: rgba(239, 68, 68, 0.1);
+    background: transparent;
     color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    /* Outlined style from screenshot */
+    padding: 12px;
+    border-radius: 20px;
+    /* More rounded */
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
 .cancel-enroll-btn-modern:hover {
-    background: #ef4444;
-    color: white;
+    background: rgba(239, 68, 68, 0.1);
     border-color: #ef4444;
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.15);
+    transform: translateY(-2px);
+}
+
+.warning-text {
+    color: #fca5a5;
+    text-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
+}
+
+.danger-highlight {
+    color: #f87171;
+    font-weight: 700;
+}
+
+.course-code-tag {
+    color: #ff8b8b;
+    /* Pinkish-red from screenshot */
+    background: rgba(255, 139, 139, 0.08);
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: lowercase;
+    /* Matches "exe101" screenshot style */
+    border: 1px solid rgba(255, 139, 139, 0.15);
 }
 
 /* --- PROFESSIONAL NOTIFICATION FORM --- */
@@ -2656,4 +2954,40 @@ h2 {
 
 .toast-close:hover {
     opacity: 1;
+}
+
+/* --- STUDENT LIST SEARCH & FILTERS --- */
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-input,
+.filter-select-modern {
+    padding: 10px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 200px;
+}
+
+.search-input:focus,
+.filter-select-modern:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.filter-select-modern {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
 }

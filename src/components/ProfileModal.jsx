@@ -12,8 +12,8 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
         setToast({ msg, type });
         setTimeout(() => setToast(null), 3000);
     };
-    const isStudent = user?.roles.includes("ROLE_STUDENT");
-    const isTeacher = user?.roles.includes("ROLE_TEACHER");
+    const isStudent = user?.roles.includes("STUDENT");
+    const isTeacher = user?.roles.includes("TEACHER");
 
     // Helper to determine if a field should be disabled
     const isDisabled = (alwaysDisabled = false) => {

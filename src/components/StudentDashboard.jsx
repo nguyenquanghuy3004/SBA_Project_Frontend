@@ -86,7 +86,7 @@ const StudentDashboard = ({ user }) => {
         }
         try {
             await enrollmentService.enroll(profile.studentId, classId);
-            showToast("✅ Đăng ký môn học thành công!");
+            showToast(" Đăng ký môn học thành công!");
             fetchData();
         } catch (err) {
             showToast(err.message || "Lỗi khi đăng ký", "error");
@@ -198,7 +198,10 @@ const StudentDashboard = ({ user }) => {
         School: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 10-10-5L2 10l10 5Z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>,
         Clock: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
         MapPin: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
-        Users: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+        Users: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+        Alert: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
+        Plus: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>,
+        Sparkles: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></svg>
     };
 
     return (
@@ -240,7 +243,7 @@ const StudentDashboard = ({ user }) => {
                                 {(profile?.major === "None" || !profile?.major) && (
                                     <div className="major-alert-box">
                                         <div className="alert-content">
-                                            <span>⚠️</span>
+                                            <Icons.Alert />
                                             <p>Bạn chưa hoàn tất đăng ký chuyên ngành!</p>
                                         </div>
                                         <button className="setup-btn" onClick={() => setShowMajorModal(true)}>
@@ -310,8 +313,12 @@ const StudentDashboard = ({ user }) => {
                                     </div>
                                     <div className="info-card-modern">
                                         <div className="info-row-modern">
+                                            <span className="label">Mã sinh viên</span>
+                                            <span className="value bold highlight-blue">{profile?.mssv}</span>
+                                        </div>
+                                        <div className="info-row-modern">
                                             <span className="label">Ngành học</span>
-                                            <span className="value highlight">{profile?.major === "None" ? "Chưa chọn ✨" : profile?.major}</span>
+                                            <span className="value highlight">{profile?.major === "None" ? "Chưa chọn " : profile?.major}{profile?.major === "None" && <Icons.Sparkles />}</span>
                                         </div>
                                         <div className="info-row-modern">
                                             <span className="label">Lớp sinh hoạt</span>
@@ -379,8 +386,8 @@ const StudentDashboard = ({ user }) => {
                                 <div>
                                     <h3><Icons.Book /> Danh sách lớp học đang mở</h3>
                                     <p className={`reg-status ${allTermEnrollments.length < 5 ? 'incomplete' : 'complete'}`}>
-                                        Tiến độ đăng ký: <strong>{allTermEnrollments.length}/5 môn</strong>
-                                        {allTermEnrollments.length < 5 && <span className="reg-hint"> (Cần đăng ký thêm {5 - allTermEnrollments.length} môn để đủ điều kiện tính GPA)</span>}
+                                        <Icons.Plus /> Tiến độ đăng ký: <strong>{allTermEnrollments.length}/5 môn</strong>
+                                        {allTermEnrollments.length < 5 && <span className="reg-hint danger-highlight">(Cần đăng ký đủ 5 môn để hệ thống tính GPA học kỳ)</span>}
                                     </p>
                                 </div>
                                 <div className="semester-badge-modern">
@@ -398,12 +405,11 @@ const StudentDashboard = ({ user }) => {
                                     return (
                                         <div className="class-card-modern" key={cls.id}>
                                             <div className="card-top">
-                                                <div className="class-tag">{cls.course.courseCode}</div>
                                                 <div className="enroll-status">
                                                     {isEnrolled && <span className="status-enrolled">✓ Đã đăng ký</span>}
                                                 </div>
                                             </div>
-                                            <h4>{cls.course.name}</h4>
+                                            <h4><span className="course-code-tag">{cls.course.courseCode}</span> - {cls.course.name}</h4>
                                             <div className="class-details-modern">
                                                 <p><span><Icons.User /></span> <strong>Giảng viên:</strong> {cls.teacher?.fullName || "Chưa phân công"}</p>
                                                 <p><span><Icons.Calendar /></span> <strong>Lịch học:</strong> {cls.schedule}</p>
@@ -417,7 +423,7 @@ const StudentDashboard = ({ user }) => {
                                                     </button>
                                                 ) : (
                                                     <button onClick={() => handleEnroll(cls.id)} className="enroll-btn-modern">
-                                                        <span>➕</span> Đăng ký môn học
+                                                        <Icons.Plus /> Đăng ký môn học
                                                     </button>
                                                 )}
                                             </div>
@@ -437,22 +443,24 @@ const StudentDashboard = ({ user }) => {
                     {/* 3. SCHEDULE */}
                     {activeTab === "schedule" && (
                         <div className="schedule-section">
-                            <h3>📅 Thời khóa biểu cá nhân</h3>
+                            <div className="section-header">
+                                <h3><Icons.Calendar /> Thời khóa biểu cá nhân</h3>
+                            </div>
                             <table className="student-table">
                                 <thead>
                                     <tr>
-                                        <th>Mã môn</th>
-                                        <th>Tên môn học</th>
-                                        <th>Lịch học</th>
-                                        <th>Phòng</th>
-                                        <th>Giảng viên</th>
+                                        <th>MÃ MÔN</th>
+                                        <th>TÊN MÔN HỌC</th>
+                                        <th>LỊCH HỌC</th>
+                                        <th>PHÒNG</th>
+                                        <th>GIẢNG VIÊN</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {myEnrollments.map(en => (
                                         <tr key={en.id}>
                                             <td className="bold">{en.subjectClass.course.courseCode}</td>
-                                            <td>{en.subjectClass.course.name}</td>
+                                            <td className="bold-text">{en.subjectClass.course.name}</td>
                                             <td>{en.subjectClass.schedule}</td>
                                             <td>{en.subjectClass.room}</td>
                                             <td>{en.subjectClass.teacher?.fullName}</td>
@@ -470,17 +478,18 @@ const StudentDashboard = ({ user }) => {
                     {activeTab === "grades" && (
                         <div className="grades-section">
                             <div className="section-header">
-                                <h3>📊 Bảng điểm chi tiết</h3>
+                                <h3><Icons.Chart /> Bảng điểm chi tiết</h3>
                             </div>
                             <table className="student-table">
                                 <thead>
                                     <tr>
-                                        <th>Môn học</th>
-                                        <th>Tín chỉ</th>
-                                        <th>Chuyên cần (10%)</th>
-                                        <th>Giữa kỳ (30%)</th>
-                                        <th>Cuối kỳ (60%)</th>
-                                        <th>Tổng kết</th>
+                                        <th>MÔN HỌC</th>
+                                        <th>HỌC KỲ</th>
+                                        <th>TÍN CHỈ</th>
+                                        <th>CHUYÊN CẦN (10%)</th>
+                                        <th>GIỮA KỲ (30%)</th>
+                                        <th>CUỐI KỲ (60%)</th>
+                                        <th>TỔNG KẾT</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -489,8 +498,10 @@ const StudentDashboard = ({ user }) => {
                                             <td>
                                                 <div className="subject-name-cell">
                                                     <strong>{en.subjectClass.course.name}</strong>
-                                                    <div className="semester-pill">{en.subjectClass.semester.name}</div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                <div className="semester-pill">{en.subjectClass.semester.name}</div>
                                             </td>
                                             <td>{en.subjectClass.course.creadits}</td>
                                             <td>{en.attendanceScore || "-"}</td>
@@ -500,7 +511,7 @@ const StudentDashboard = ({ user }) => {
                                         </tr>
                                     ))}
                                     {myEnrollments.length === 0 && (
-                                        <tr><td colSpan="6">Chưa có dữ liệu điểm.</td></tr>
+                                        <tr><td colSpan="7">Chưa có dữ liệu điểm.</td></tr>
                                     )}
                                 </tbody>
                             </table>

@@ -6,6 +6,7 @@ const StudentList = ({ user }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedMajor, setSelectedMajor] = useState("All");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -27,7 +28,9 @@ const StudentList = ({ user }) => {
         setTimeout(() => setToast(null), 3000);
     };
 
-    const isAdminOrTeacher = user && (user.roles.includes("ROLE_ADMIN") || user.roles.includes("ROLE_TEACHER"));
+    const isAdminOrTeacher = user && (
+        user.roles.includes("ADMIN") || user.roles.includes("TEACHER")
+    );
 
     const fetchStudents = async () => {
         setLoading(true);
@@ -126,6 +129,16 @@ const StudentList = ({ user }) => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
+                    <select
+                        className="filter-select-modern"
+                        value={selectedMajor}
+                        onChange={(e) => setSelectedMajor(e.target.value)}
+                    >
+                        <option value="All">Tất cả Chuyên ngành</option>
+                        {Array.from(new Set(students.map(s => s.major))).filter(Boolean).map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
+                    </select>
                     <button className="add-btn" onClick={() => setIsModalOpen(true)}>
                         + Thêm sinh viên
                     </button>
@@ -295,7 +308,7 @@ const StudentList = ({ user }) => {
                     <table className="student-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>MSSV</th>
                                 <th>Họ và tên</th>
                                 <th>Giới tính</th>
                                 <th>Ngày sinh</th>
@@ -303,26 +316,28 @@ const StudentList = ({ user }) => {
                                 <th>Điện thoại</th>
                                 <th>Chuyên ngành</th>
                                 <th>GPA</th>
-                                {user.roles.includes("ROLE_ADMIN") && <th>Thao tác</th>}
+                                {(user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && <th>Thao tác</th>}
                             </tr>
                         </thead>
                         <tbody>
                             {students
-                                .filter(s =>
-                                    s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    s.studentId.toString().includes(searchTerm)
-                                )
+                                .filter(s => {
+                                    const matchSearch = s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        s.studentId.toString().includes(searchTerm);
+                                    const matchMajor = selectedMajor === "All" || s.major === selectedMajor;
+                                    return matchSearch && matchMajor;
+                                })
                                 .map((student) => (
                                     <tr key={student.studentId}>
-                                        <td>{student.studentId}</td>
+                                        <td className="bold">{student.mssv}</td>
                                         <td>{student.studentName}</td>
                                         <td>{student.gender}</td>
                                         <td>{student.dateOfBirth}</td>
                                         <td>{student.studentEmail}</td>
                                         <td>{student.studentPhone}</td>
                                         <td>{student.major}</td>
-                                        <td>{student.gpa}</td>
-                                        {user.roles.includes("ROLE_ADMIN") && (
+                                        <td>{student.gpa != null ? Number(student.gpa).toFixed(2) : "-"}</td>
+                                        {(user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && (
                                             <td>
                                                 <div className="header-actions">
                                                     <button

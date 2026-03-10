@@ -9,6 +9,9 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
         password: "",
         confirmPassword: "",
         phone: "",
+        gender: "Nam",
+        dateOfBirth: "",
+        address: "",
     });
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
@@ -35,6 +38,9 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
                 email: formData.email,
                 password: formData.password,
                 phone: formData.phone,
+                gender: formData.gender,
+                dateOfBirth: formData.dateOfBirth,
+                address: formData.address,
                 role: ["user"]
             };
             await authService.register(userData);
@@ -97,6 +103,41 @@ const Register = ({ onRegisterSuccess, toggleAuth }) => {
                         onChange={handleChange}
                         required
                         placeholder="Nhập lại mật khẩu"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Giới tính</label>
+                    <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="gender-select"
+                        required
+                    >
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label>Ngày sinh</label>
+                    <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Quê quán</label>
+                    <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        required
+                        placeholder="Nhập quê quán (Hà Nội, Nam Định...)"
                     />
                 </div>
                 <div className="form-group">

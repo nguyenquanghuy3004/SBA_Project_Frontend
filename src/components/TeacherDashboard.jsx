@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import classService from "../services/classService";
 import enrollmentService from "../services/enrollmentService";
 import notificationService from "../services/notificationService";
+import teacherService from "../services/teacherService";
 import "./TeacherDashboard.css";
 
 const TeacherDashboard = ({ user }) => {
@@ -10,6 +11,7 @@ const TeacherDashboard = ({ user }) => {
     const [selectedClass, setSelectedClass] = useState(null);
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [profile, setProfile] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const [notifForm, setNotifForm] = useState({ title: "", message: "" });
     const [toast, setToast] = useState(null);
@@ -26,12 +28,14 @@ const TeacherDashboard = ({ user }) => {
     const fetchInitialData = async () => {
         setLoading(true);
         try {
-            const [classes, notifs] = await Promise.all([
+            const [classes, notifs, profileData] = await Promise.all([
                 classService.getClassesByTeacher(user.id),
-                notificationService.getMyNotifications()
+                notificationService.getMyNotifications(),
+                teacherService.getMyProfile()
             ]);
             setMyClasses(classes);
             setNotifications(notifs);
+            setProfile(profileData);
         } catch (err) {
             console.error(err);
         } finally {
@@ -55,13 +59,37 @@ const TeacherDashboard = ({ user }) => {
     };
 
     const handleGradeChange = (enrollmentId, field, value) => {
+        if (value === "") {
+            setStudents(prev => prev.map(s =>
+                s.id === enrollmentId ? { ...s, [field]: "" } : s
+            ));
+            return;
+        }
+
+        const numValue = parseFloat(value);
+        // Sửa lại logic: Nếu điểm <= 0 HOẶC điểm >= 10 thì báo lỗi
+        if (isNaN(numValue) || numValue <= 0 || numValue >= 10) {
+            showToast("Điểm phải là số lớn hơn 0 và nhỏ hơn 10!", "error");
+            return;
+        }
+
         setStudents(prev => prev.map(s =>
-            s.id === enrollmentId ? { ...s, [field]: parseFloat(value) || 0 } : s
+            s.id === enrollmentId ? { ...s, [field]: numValue } : s
         ));
     };
 
     const saveGrades = async (enrollmentId) => {
         const student = students.find(s => s.id === enrollmentId);
+
+        // Kiểm tra trước khi lưu: Phải lớn hơn 0 và nhỏ hơn 10
+        if (
+            student.attendanceScore <= 0 || student.attendanceScore >= 10 ||
+            student.midtermScore <= 0 || student.midtermScore >= 10 ||
+            student.finalScore <= 0 || student.finalScore >= 10
+        ) {
+            showToast("Vui lòng nhập điểm hợp lệ (phải > 0 và < 10)!", "error");
+            return;
+        }
         try {
             await enrollmentService.updateGrades(enrollmentId, {
                 attendance: student.attendanceScore,
@@ -106,9 +134,13 @@ const TeacherDashboard = ({ user }) => {
         Edit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
         Send: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>,
         Lock: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
+        Unlock: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" /></svg>,
         Calendar: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
         MapPin: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
-        Chart: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+        Chart: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>,
+        ClipboardList: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>,
+        GraduationCap: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>,
+        Id: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="7" y1="8" x2="17" y2="8" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="7" y1="16" x2="12" y2="16" /></svg>
     };
 
     return (
@@ -144,24 +176,24 @@ const TeacherDashboard = ({ user }) => {
                     <div className="overview-section fade-in">
                         <div className="stats-grid">
                             <div className="stat-card">
+                                <span className="stat-icon"><Icons.Id /></span>
+                                <div className="stat-info">
+                                    <p>Mã giáo viên</p>
+                                    <h3 className="highlight-blue">{profile?.teacherCode || "..."}</h3>
+                                </div>
+                            </div>
+                            <div className="stat-card">
                                 <span className="stat-icon"><Icons.User /></span>
                                 <div className="stat-info">
-                                    <p>Giảng viên</p>
-                                    <h3>{user.username}</h3>
+                                    <p>Họ và tên</p>
+                                    <h3>{profile?.fullName || user.username}</h3>
                                 </div>
                             </div>
                             <div className="stat-card">
-                                <span className="stat-icon"><Icons.BookOpen /></span>
+                                <span className="stat-icon"><Icons.School /></span>
                                 <div className="stat-info">
-                                    <p>Số lớp đang dạy</p>
+                                    <p>Lớp học</p>
                                     <h3>{myClasses.length}</h3>
-                                </div>
-                            </div>
-                            <div className="stat-card">
-                                <span className="stat-icon"><Icons.Bell /></span>
-                                <div className="stat-info">
-                                    <p>Thông báo mới</p>
-                                    <h3>{notifications.filter(n => !n.read).length}</h3>
                                 </div>
                             </div>
                         </div>
@@ -191,18 +223,17 @@ const TeacherDashboard = ({ user }) => {
                 {activeTab === "classes" && (
                     <div className="registration-section fade-in">
                         <div className="section-header">
-                            <h3>📋 Danh sách các lớp phụ trách</h3>
+                            <h3><Icons.ClipboardList /> Danh sách các lớp phụ trách</h3>
                         </div>
                         <div className="class-grid">
                             {myClasses.map(cls => (
                                 <div className="class-card teacher-class-card" key={cls.id}>
-                                    <div className="class-tag">{cls.course.courseCode}</div>
-                                    <h4>{cls.course.name}</h4>
+                                    <h4>{cls.course.courseCode}-- {cls.course.name}</h4>
                                     <div className="class-details">
-                                        <p>📍 <strong>Phòng:</strong> {cls.room}</p>
-                                        <p>📅 <strong>Lịch:</strong> {cls.schedule}</p>
-                                        <p>🎓 <strong>Học kỳ:</strong> {cls.semester?.name}</p>
-                                        <p>🔒 <strong>Trạng thái:</strong> {cls.locked ? <span style={{ color: '#ef4444' }}>Đã khóa điểm</span> : <span style={{ color: '#10b981' }}>Đang mở</span>}</p>
+                                        <p><Icons.MapPin /> <strong>Phòng:</strong> {cls.room}</p>
+                                        <p><Icons.Calendar /> <strong>Lịch:</strong> {cls.schedule}</p>
+                                        <p><Icons.GraduationCap /> <strong>Học kỳ:</strong> {cls.semester?.name}</p>
+                                        <p>{cls.locked ? <Icons.Lock /> : <Icons.Unlock />} <strong>Trạng thái:</strong> {cls.locked ? <span style={{ color: '#ef4444' }}>Đã khóa điểm</span> : <span style={{ color: '#10b981' }}>Đang mở</span>}</p>
                                     </div>
                                     <button className="enroll-btn" onClick={() => handleViewClass(cls)}>Quản lý lớp</button>
                                 </div>
@@ -215,10 +246,10 @@ const TeacherDashboard = ({ user }) => {
                 {activeTab === "grades" && selectedClass && (
                     <div className="grades-section fade-in">
                         <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3>📊 Nhập điểm: {selectedClass.course.name}</h3>
+                            <h3><Icons.Chart /> Nhập điểm: {selectedClass.course.name}</h3>
                             {!selectedClass.locked && (
                                 <button className="delete-btn" style={{ background: '#ef4444', color: 'white' }} onClick={handleLockClass}>
-                                    🔒 Khóa & Nộp điểm
+                                    <Icons.Lock /> Khóa & Nộp điểm
                                 </button>
                             )}
                         </div>
@@ -237,12 +268,13 @@ const TeacherDashboard = ({ user }) => {
                             <tbody>
                                 {students.map(en => (
                                     <tr key={en.id}>
-                                        <td className="bold">{en.student.studentId}</td>
+                                        <td className="bold">{en.student.mssv}</td>
                                         <td>{en.student.studentName}</td>
                                         <td>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 className="grade-input"
+                                                placeholder="0.0"
                                                 disabled={selectedClass.locked}
                                                 value={en.attendanceScore ?? ""}
                                                 onChange={(e) => handleGradeChange(en.id, "attendanceScore", e.target.value)}
@@ -250,8 +282,9 @@ const TeacherDashboard = ({ user }) => {
                                         </td>
                                         <td>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 className="grade-input"
+                                                placeholder="0.0"
                                                 disabled={selectedClass.locked}
                                                 value={en.midtermScore ?? ""}
                                                 onChange={(e) => handleGradeChange(en.id, "midtermScore", e.target.value)}
@@ -259,8 +292,9 @@ const TeacherDashboard = ({ user }) => {
                                         </td>
                                         <td>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 className="grade-input"
+                                                placeholder="0.0"
                                                 disabled={selectedClass.locked}
                                                 value={en.finalScore ?? ""}
                                                 onChange={(e) => handleGradeChange(en.id, "finalScore", e.target.value)}
@@ -323,7 +357,7 @@ const TeacherDashboard = ({ user }) => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
