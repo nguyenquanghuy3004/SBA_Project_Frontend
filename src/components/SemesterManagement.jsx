@@ -3,7 +3,7 @@ import semesterService from "../services/semesterService";
 
 const SemesterManagement = () => {
     const [semesters, setSemesters] = useState([]);
-    const [formData, setFormData] = useState({ name: "", status: "OPEN_REGISTRATION" });
+    const [formData, setFormData] = useState({ name: "", status: "Đang mở" });
     const [editingId, setEditingId] = useState(null);
     const [toast, setToast] = useState(null);
 
@@ -41,7 +41,7 @@ const SemesterManagement = () => {
     };
 
     const handleCancel = () => {
-        setFormData({ name: "", status: "OPEN_REGISTRATION" });
+        setFormData({ name: "", status: "Đang mở" });
         setEditingId(null);
     };
 
@@ -55,7 +55,7 @@ const SemesterManagement = () => {
             try {
                 await semesterService.deleteSemester(id);
                 fetchSemesters();
-                showToast("🗑️ Đã xóa học kỳ!");
+                showToast("Đã xóa học kỳ!");
             } catch (err) {
                 showToast(err.message, "error");
             }
@@ -82,9 +82,9 @@ const SemesterManagement = () => {
                     value={formData.status}
                     onChange={e => setFormData({ ...formData, status: e.target.value })}
                 >
-                    <option value="OPEN_REGISTRATION">Mở đăng ký</option>
-                    <option value="ONGOING">Đang diễn ra</option>
-                    <option value="FINISHED">Đã kết thúc</option>
+                    <option value="Đang mở">Mở đăng ký</option>
+                    <option value="Đang diễn ra">Đang diễn ra</option>
+                    <option value="Đã kết thúc">Đã kết thúc</option>
                 </select>
                 <div className="header-actions">
                     <button type="submit" className={editingId ? "save-btn" : "add-btn"}>
@@ -113,7 +113,7 @@ const SemesterManagement = () => {
                             <td>{s.id}</td>
                             <td>{s.name}</td>
                             <td>
-                                <span className={`user-badge ${s.status === 'ONGOING' ? 'bold' : ''}`}>
+                                <span className={`user-badge ${s.status === 'Đang diễn ra' ? 'bold' : ''}`}>
                                     {s.status}
                                 </span>
                             </td>
