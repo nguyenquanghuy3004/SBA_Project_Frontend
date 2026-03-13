@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import studentService from "../services/studentService";
+import Pagination from "./Pagination";
 
 const StudentList = ({ user }) => {
     const [students, setStudents] = useState([]);
@@ -7,12 +8,18 @@ const StudentList = ({ user }) => {
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedMajor, setSelectedMajor] = useState("All");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedMajor]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [newStudent, setNewStudent] = useState({
         studentName: "",
-        gender: "Male",
+        gender: "Nam",
         dateOfBirth: "",
         studentEmail: "",
         studentPhone: "",
@@ -54,11 +61,21 @@ const StudentList = ({ user }) => {
     const handleCreateStudent = async (e) => {
         e.preventDefault();
         try {
-            await studentService.createStudent(newStudent);
+            // Làm sạch dữ liệu trước khi gửi
+            const studentToCreate = {
+                ...newStudent,
+                studentName: newStudent.studentName?.trim(),
+                studentEmail: newStudent.studentEmail?.trim(),
+                studentPhone: newStudent.studentPhone?.trim(),
+                major: newStudent.major?.trim(),
+                gpa: newStudent.gpa === "" ? 0 : parseFloat(newStudent.gpa)
+            };
+
+            await studentService.createStudent(studentToCreate);
             setIsModalOpen(false);
             setNewStudent({
                 studentName: "",
-                gender: "Male",
+                gender: "Nam",
                 dateOfBirth: "",
                 studentEmail: "",
                 studentPhone: "",
@@ -80,7 +97,16 @@ const StudentList = ({ user }) => {
     const handleUpdateStudent = async (e) => {
         e.preventDefault();
         try {
-            await studentService.updateStudent(editingStudent.studentId, editingStudent);
+            // Đảm bảo GPA là số và các trường khác được trim
+            const updatedData = {
+                ...editingStudent,
+                gpa: editingStudent.gpa === "" ? 0 : parseFloat(editingStudent.gpa),
+                studentName: editingStudent.studentName?.trim(),
+                studentEmail: editingStudent.studentEmail?.trim(),
+                studentPhone: editingStudent.studentPhone?.trim()
+            };
+
+            await studentService.updateStudent(updatedData.studentId, updatedData);
             setIsEditModalOpen(false);
             setEditingStudent(null);
             fetchStudents();
@@ -110,6 +136,25 @@ const StudentList = ({ user }) => {
             </div>
         );
     }
+
+    const filteredStudents = students.filter(s => {
+        const matchSearch = s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.studentId.toString().includes(searchTerm);
+        const matchMajor = selectedMajor === "All" || s.major === selectedMajor;
+        return matchSearch && matchMajor;
+    });
+
+    const formatGender = (g) => {
+        if (!g) return "";
+        if (g === "Female" || g === "Nữ") return "Nữ";
+        if (g === "Male" || g === "Nam") return "Nam";
+        if (g === "Other" || g === "Khác") return "Khác";
+        return g;
+    };
+
+    const indexOfLastStudent = currentPage * itemsPerPage;
+    const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
+    const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
 
     return (
         <div className="student-list-container">
@@ -166,9 +211,9 @@ const StudentList = ({ user }) => {
                                 onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
                                 required
                             >
-                                <option value="Male">Nam</option>
-                                <option value="Female">Nữ</option>
-                                <option value="Other">Khác</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
                             </select>
                             <input
                                 type="date"
@@ -239,9 +284,9 @@ const StudentList = ({ user }) => {
                                     onChange={(e) => setEditingStudent({ ...editingStudent, gender: e.target.value })}
                                     required
                                 >
-                                    <option value="Male">Nam</option>
-                                    <option value="Female">Nữ</option>
-                                    <option value="Other">Khác</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
                                 </select>
                             </div>
                             <div className="form-group">
@@ -320,47 +365,48 @@ const StudentList = ({ user }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {students
-                                .filter(s => {
-                                    const matchSearch = s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                        s.studentId.toString().includes(searchTerm);
-                                    const matchMajor = selectedMajor === "All" || s.major === selectedMajor;
-                                    return matchSearch && matchMajor;
-                                })
-                                .map((student) => (
-                                    <tr key={student.studentId}>
-                                        <td className="bold">{student.mssv}</td>
-                                        <td>{student.studentName}</td>
-                                        <td>{student.gender}</td>
-                                        <td>{student.dateOfBirth}</td>
-                                        <td>{student.studentEmail}</td>
-                                        <td>{student.studentPhone}</td>
-                                        <td>{student.major}</td>
-                                        <td>{student.gpa != null ? Number(student.gpa).toFixed(2) : "-"}</td>
-                                        {(user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && (
-                                            <td>
-                                                <div className="header-actions">
-                                                    <button
-                                                        className="refresh-btn"
-                                                        style={{ padding: '4px 8px', fontSize: '0.8rem', background: '#4f46e5' }}
-                                                        onClick={() => handleEditClick(student)}
-                                                    >
-                                                        Sửa
-                                                    </button>
-                                                    <button
-                                                        className="delete-btn"
-                                                        onClick={() => handleDelete(student.studentId)}
-                                                    >
-                                                        Xóa
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        )}
-                                    </tr>
-                                ))}
+                            {currentStudents.map((student) => (
+                                <tr key={student.studentId}>
+                                    <td className="bold">{student.mssv}</td>
+                                    <td>{student.studentName}</td>
+                                    <td>{formatGender(student.gender)}</td>
+                                    <td>{student.dateOfBirth}</td>
+                                    <td>{student.studentEmail}</td>
+                                    <td>{student.studentPhone}</td>
+                                    <td>{student.major}</td>
+                                    <td>{student.gpa != null ? Number(student.gpa).toFixed(2) : "-"}</td>
+                                    {(user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && (
+                                        <td>
+                                            <div className="header-actions">
+                                                <button
+                                                    className="refresh-btn"
+                                                    style={{ padding: '4px 8px', fontSize: '0.8rem', background: '#4f46e5' }}
+                                                    onClick={() => handleEditClick(student)}
+                                                >
+                                                    Sửa
+                                                </button>
+                                                <button
+                                                    className="delete-btn"
+                                                    onClick={() => handleDelete(student.studentId)}
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </div>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
-                    {students.length === 0 && <p className="no-data">Không có sinh viên nào.</p>}
+                    {filteredStudents.length === 0 && <p className="no-data">Không có sinh viên nào.</p>}
+                    {filteredStudents.length > 0 && (
+                        <Pagination
+                            itemsPerPage={itemsPerPage}
+                            totalItems={filteredStudents.length}
+                            paginate={setCurrentPage}
+                            currentPage={currentPage}
+                        />
+                    )}
                 </div>
             )}
         </div>

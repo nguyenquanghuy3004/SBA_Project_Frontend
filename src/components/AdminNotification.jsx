@@ -52,11 +52,11 @@ const AdminNotification = () => {
         try {
             if (selectedTarget === "all") {
                 await notificationService.notifyAllTeachers(form.title, form.message);
-                showToast(`✅ Đã gửi thông báo tới tất cả ${teachers.length} giáo viên!`);
+                showToast(`Đã gửi thông báo tới tất cả ${teachers.length} giáo viên!`);
             } else {
                 await notificationService.notifyTeacher(selectedTarget, form.title, form.message);
                 const teacher = teachers.find(t => t.id === selectedTarget);
-                showToast(`✅ Đã gửi thông báo tới GV ${teacher?.fullName || ""}!`);
+                showToast(`Đã gửi thông báo tới GV ${teacher?.fullName || ""}!`);
             }
             setForm({ title: "", message: "" });
         } catch (err) {

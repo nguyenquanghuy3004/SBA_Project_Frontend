@@ -6,6 +6,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import TeacherDashboard from "./components/TeacherDashboard";
 import StudentDashboard from "./components/StudentDashboard";
 import ProfileModal from "./components/ProfileModal";
+import LandingPage from "./components/LandingPage";
 import "./App.css";
 
 function App() {
@@ -14,6 +15,9 @@ function App() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    
+    // State để chuyển đổi giữa Trang chủ và Form Đăng Nhập
+    const [publicView, setPublicView] = useState("home");
 
     const handleLoginSuccess = (userData) => {
         setUser(userData);
@@ -40,8 +44,26 @@ function App() {
 
 
     if (!user) {
+        if (publicView === "home") {
+            return <LandingPage onNavigate={(action) => { 
+                if (action === "login") {
+                    setIsLogin(true);
+                    setPublicView("auth");
+                } else if (action === "register") {
+                    setIsLogin(false);
+                    setPublicView("auth");
+                }
+            }} />;
+        }
+
         return (
-            <div className="auth-page">
+            <div className="auth-page" style={{ position: "relative" }}>
+                <button 
+                    onClick={() => setPublicView("home")} 
+                    style={{ position: "absolute", top: "20px", left: "20px", padding: "8px 15px", background: "white", border: "1px solid #ccc", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
+                >
+                    ⬅ Quay lại Trang chủ
+                </button>
                 {isLogin ? (
                     <Login onLoginSuccess={handleLoginSuccess} toggleAuth={toggleAuth} />
                 ) : (
@@ -80,7 +102,15 @@ function App() {
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         >
                             <span className="user-badge">{user.roles[0]}</span>
-                            <span className="username">Welcome, <strong>{user.username}</strong></span>
+                            <span className="username">
+                                {(() => {
+                                    const hour = new Date().getHours();
+                                    if (hour >= 5 && hour < 12) return "Chào buổi sáng";
+                                    if (hour >= 12 && hour < 18) return "Chào buổi chiều";
+                                    if (hour >= 18 && hour < 24) return "Chào buổi tối";
+                                    return "Chào buổi đêm";
+                                })()}, <strong>{user.username}</strong>
+                            </span>
                             <div className="avatar-circle">
                                 {user.username.charAt(0).toUpperCase()}
                             </div>

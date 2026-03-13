@@ -3,6 +3,7 @@ import classService from "../services/classService";
 import enrollmentService from "../services/enrollmentService";
 import notificationService from "../services/notificationService";
 import teacherService from "../services/teacherService";
+import Pagination from "./Pagination";
 import "./TeacherDashboard.css";
 
 const TeacherDashboard = ({ user }) => {
@@ -15,6 +16,15 @@ const TeacherDashboard = ({ user }) => {
     const [notifications, setNotifications] = useState([]);
     const [notifForm, setNotifForm] = useState({ title: "", message: "" });
     const [toast, setToast] = useState(null);
+
+    const [classPage, setClassPage] = useState(1);
+    const [gradePage, setGradePage] = useState(1);
+    const itemsPerPage = 5;
+
+    useEffect(() => {
+        setClassPage(1);
+        setGradePage(1);
+    }, [activeTab, selectedClass]);
 
     const showToast = (msg, type = "success") => {
         setToast({ msg, type });
@@ -45,14 +55,16 @@ const TeacherDashboard = ({ user }) => {
 
     const handleViewClass = async (cls) => {
         setSelectedClass(cls);
+        setStudents([]);
+        setActiveTab("grades"); // Chuyển tab trước để UX mượt hơn
         setLoading(true);
         try {
             const data = await enrollmentService.getClassList(cls.id);
             setStudents(data);
-            setActiveTab("grades");
         } catch (err) {
             console.error("Lỗi tải DS sinh viên:", err);
-            showToast("Không thể tải danh sách sinh viên lớp này.", "error");
+            // Không hiện toast lỗi nếu chỉ là chưa có sinh viên đăng ký
+            setStudents([]);
         } finally {
             setLoading(false);
         }
@@ -143,6 +155,14 @@ const TeacherDashboard = ({ user }) => {
         Id: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="7" y1="8" x2="17" y2="8" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="7" y1="16" x2="12" y2="16" /></svg>
     };
 
+    const indexOfLastClass = classPage * itemsPerPage;
+    const indexOfFirstClass = indexOfLastClass - itemsPerPage;
+    const currentClasses = myClasses.slice(indexOfFirstClass, indexOfLastClass);
+
+    const indexOfLastGrade = gradePage * itemsPerPage;
+    const indexOfFirstGrade = indexOfLastGrade - itemsPerPage;
+    const currentGrades = students.slice(indexOfFirstGrade, indexOfLastGrade);
+
     return (
         <div className="student-dashboard teacher-dashboard">
             {toast && (
@@ -226,7 +246,7 @@ const TeacherDashboard = ({ user }) => {
                             <h3><Icons.ClipboardList /> Danh sách các lớp phụ trách</h3>
                         </div>
                         <div className="class-grid">
-                            {myClasses.map(cls => (
+                            {currentClasses.map(cls => (
                                 <div className="class-card teacher-class-card" key={cls.id}>
                                     <h4>{cls.course.courseCode}-- {cls.course.name}</h4>
                                     <div className="class-details">
@@ -239,6 +259,7 @@ const TeacherDashboard = ({ user }) => {
                                 </div>
                             ))}
                         </div>
+                        <Pagination itemsPerPage={itemsPerPage} totalItems={myClasses.length} paginate={setClassPage} currentPage={classPage} />
                     </div>
                 )}
 
@@ -266,50 +287,62 @@ const TeacherDashboard = ({ user }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {students.map(en => (
-                                    <tr key={en.id}>
-                                        <td className="bold">{en.student.mssv}</td>
-                                        <td>{en.student.studentName}</td>
-                                        <td>
-                                            <input
-                                                type="text"
-                                                className="grade-input"
-                                                placeholder="0.0"
-                                                disabled={selectedClass.locked}
-                                                value={en.attendanceScore ?? ""}
-                                                onChange={(e) => handleGradeChange(en.id, "attendanceScore", e.target.value)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="text"
-                                                className="grade-input"
-                                                placeholder="0.0"
-                                                disabled={selectedClass.locked}
-                                                value={en.midtermScore ?? ""}
-                                                onChange={(e) => handleGradeChange(en.id, "midtermScore", e.target.value)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="text"
-                                                className="grade-input"
-                                                placeholder="0.0"
-                                                disabled={selectedClass.locked}
-                                                value={en.finalScore ?? ""}
-                                                onChange={(e) => handleGradeChange(en.id, "finalScore", e.target.value)}
-                                            />
-                                        </td>
-                                        <td className="bold">{(en.attendanceScore * 0.1 + en.midtermScore * 0.3 + en.finalScore * 0.6).toFixed(2)}</td>
-                                        <td>
-                                            {!selectedClass.locked && (
-                                                <button className="save-btn" onClick={() => saveGrades(en.id)}>Lưu</button>
-                                            )}
+                                {students.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                                                <span style={{ fontSize: '2rem' }}>📋</span>
+                                                <span>Chưa có sinh viên nào đăng ký lớp này.</span>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    currentGrades.map(en => (
+                                        <tr key={en.id}>
+                                            <td className="bold">{en.student.mssv}</td>
+                                            <td>{en.student.studentName}</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    className="grade-input"
+                                                    placeholder="0.0"
+                                                    disabled={selectedClass.locked}
+                                                    value={en.attendanceScore ?? ""}
+                                                    onChange={(e) => handleGradeChange(en.id, "attendanceScore", e.target.value)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    className="grade-input"
+                                                    placeholder="0.0"
+                                                    disabled={selectedClass.locked}
+                                                    value={en.midtermScore ?? ""}
+                                                    onChange={(e) => handleGradeChange(en.id, "midtermScore", e.target.value)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    className="grade-input"
+                                                    placeholder="0.0"
+                                                    disabled={selectedClass.locked}
+                                                    value={en.finalScore ?? ""}
+                                                    onChange={(e) => handleGradeChange(en.id, "finalScore", e.target.value)}
+                                                />
+                                            </td>
+                                            <td className="bold">{(en.attendanceScore * 0.1 + en.midtermScore * 0.3 + en.finalScore * 0.6).toFixed(2)}</td>
+                                            <td>
+                                                {!selectedClass.locked && (
+                                                    <button className="save-btn" onClick={() => saveGrades(en.id)}>Lưu</button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
+                        <Pagination itemsPerPage={itemsPerPage} totalItems={students.length} paginate={setGradePage} currentPage={gradePage} />
                     </div>
                 )}
 

@@ -1,118 +1,375 @@
-/* TeacherDashboard.css */
-/* Dark mode styles consistent with the overall application theme */
+/* ============================================================
+   TeacherDashboard.css — Professional Modern Design
+   ============================================================ */
 
-/* Container for the notifications list */
+/* --- Stat Cards --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid #e8ecf4;
+    border-radius: 18px;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #f26f21, #ff8c42);
+    border-radius: 4px 0 0 4px;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(242, 111, 33, 0.12);
+    border-color: rgba(242, 111, 33, 0.2);
+}
+
+.stat-icon {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, #fff4ed, #ffe8d6);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(242, 111, 33, 0.15);
+}
+
+.stat-icon svg {
+    stroke: #f26f21;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-info p {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #94a3b8 !important;
+    margin: 0 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+    background: none !important;
+}
+
+.stat-info h3 {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    line-height: 1.2;
+    -webkit-text-fill-color: #0f172a !important;
+    background: none !important;
+    letter-spacing: -0.02em;
+}
+
+/* --- Dashboard Main Grid --- */
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+/* --- Notifications Section --- */
 .notifications-list {
-    background: var(--card);
-    /* #1e293b from App.css */
-    border: 1px solid var(--border);
-    /* rgba(255,255,255,0.1) from App.css */
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-    margin-top: 1rem;
+    background: #ffffff;
+    border: 1px solid #e8ecf4;
+    border-radius: 20px;
+    padding: 1.75rem;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
     animation: fadeIn 0.4s ease-out;
 }
 
-/* Title with icon */
 .notifications-list h3 {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.1rem;
-    color: #f8fafc;
-    margin-bottom: 1.5rem;
-    -webkit-text-fill-color: initial;
-    /* Reset background-clip if applied globally */
-    background: transparent;
+    gap: 0.6rem;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    background: none !important;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.notifications-list h3 svg {
+    stroke: #f26f21;
 }
 
 .notif-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
-/* Individual notification item */
+/* --- Notification Items --- */
 .notif-item {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 1rem;
-    border-radius: 12px;
-    background: rgba(15, 23, 42, 0.4);
-    /* Dark background matching the theme */
-    border: 1px solid var(--border);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
 }
 
 .notif-item:hover {
-    background: rgba(15, 23, 42, 0.6);
-    transform: translateY(-2px);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    background: #f0f4ff;
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateX(4px);
 }
 
-/* Unread indicator dot */
+.notif-item.unread {
+    background: #fff8f4;
+    border-left: 3px solid #f26f21;
+    border-color: rgba(242, 111, 33, 0.15);
+}
+
 .notif-dot {
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
-    background: var(--primary);
-    /* #6366f1 from App.css */
     margin-top: 6px;
     flex-shrink: 0;
-    box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
 }
 
-/* Read state hides the dot or fades it */
+.notif-item.unread .notif-dot {
+    background: #f26f21;
+    box-shadow: 0 0 8px rgba(242, 111, 33, 0.5);
+}
+
 .notif-item.read .notif-dot {
-    background: rgba(148, 163, 184, 0.4);
-    box-shadow: none;
+    background: #e2e8f0;
 }
 
-.notif-item.read {
-    opacity: 0.8;
-}
-
-/* Body of notification */
 .notif-body {
     flex: 1;
 }
 
 .notif-body h4 {
-    margin: 0;
-    font-size: 1.05rem;
+    margin: 0 0 3px;
+    font-size: 0.92rem;
     font-weight: 600;
-    color: #e2e8f0;
+    color: #1e293b;
 }
 
 .notif-body p {
-    margin: 6px 0 0;
-    font-size: 0.95rem;
-    color: #94a3b8;
+    margin: 0 0 6px;
+    font-size: 0.85rem;
+    color: #64748b;
     line-height: 1.5;
 }
 
 .notif-time {
     display: block;
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: #64748b;
+    font-size: 0.75rem;
+    color: #94a3b8;
     font-weight: 500;
 }
 
+/* --- Empty State --- */
 .empty-msg {
     text-align: center;
-    color: #64748b;
+    padding: 2.5rem 1.5rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
     font-style: italic;
-    padding: 2rem 1rem;
-    background: rgba(15, 23, 42, 0.2);
+    background: #f8fafc;
     border-radius: 12px;
-    border: 1px dashed var(--border);
+    border: 1.5px dashed #e2e8f0;
+}
+
+/* --- Class Cards (Teacher) --- */
+.teacher-class-card {
+    background: #ffffff;
+    border: 1px solid #e8ecf4;
+    border-radius: 20px;
+    padding: 1.5rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.teacher-class-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f26f21, #ff8c42);
+}
+
+.teacher-class-card:hover {
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+    transform: translateY(-5px);
+    border-color: rgba(242, 111, 33, 0.2);
+}
+
+.teacher-class-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.class-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 1.25rem;
+}
+
+.class-details p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0;
+}
+
+.class-details p strong {
+    color: #334155;
+    font-weight: 600;
+}
+
+/* Enroll / Manage Buttons */
+.enroll-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #f26f21, #ff8c42);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 12px rgba(242, 111, 33, 0.3);
+}
+
+.enroll-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(242, 111, 33, 0.4);
+}
+
+/* Save Grades Button */
+.save-btn {
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Delete / Lock Button */
+.delete-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.delete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Grade Input */
+.grade-input {
+    width: 72px;
+    padding: 7px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0f172a;
+    background: #f8fafc;
+    text-align: center;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.grade-input:focus {
+    border-color: #f26f21;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(242, 111, 33, 0.1);
+}
+
+.grade-input:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+    border-color: #f1f5f9;
+}
+
+/* Notification Compose */
+.send-notif-btn-modern {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #f26f21, #ff8c42);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(242, 111, 33, 0.35);
+}
+
+.send-notif-btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(242, 111, 33, 0.45);
 }
 
 /* Toast Notifications */
@@ -121,62 +378,75 @@
     top: 2rem;
     right: 2rem;
     padding: 1rem 1.5rem;
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     gap: 1rem;
     z-index: 9999;
-    animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
     min-width: 300px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .toast-notification.success {
-    background: rgba(16, 185, 129, 0.9);
+    background: linear-gradient(135deg, #10b981, #059669);
     color: white;
 }
 
 .toast-notification.error {
-    background: rgba(239, 68, 68, 0.9);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
 }
 
 .toast-msg {
     font-weight: 600;
     flex: 1;
+    font-size: 0.9rem;
 }
 
 .toast-close {
-    background: transparent;
+    background: rgba(255,255,255,0.2);
     border: none;
     color: white;
-    font-size: 1.2rem;
+    font-size: 1rem;
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
 }
 
 .toast-close:hover {
-    opacity: 1;
+    background: rgba(255,255,255,0.35);
 }
 
 @keyframes toastSlideIn {
     from {
         opacity: 0;
-        transform: translateX(100%) scale(0.9);
+        transform: translateX(80px) scale(0.9);
     }
-
     to {
         opacity: 1;
         transform: translateX(0) scale(1);
     }
 }
 
-/* Responsive adjustments */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .notifications-list {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .teacher-class-card {
         padding: 1.25rem;
     }
 }

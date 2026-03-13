@@ -27,7 +27,16 @@ export const request = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
-        const errorMessage = (typeof data === 'object' ? data.message : data) || response.statusText || "Request failed";
+        let errorMessage = "Đã có lỗi xảy ra (Request failed)";
+
+        if (typeof data === 'object' && data !== null) {
+            errorMessage = data.message || data.error || data.details || JSON.stringify(data);
+        } else if (typeof data === 'string' && data.trim().length > 0) {
+            errorMessage = data;
+        } else if (response.statusText) {
+            errorMessage = `${response.statusText} (Mã lỗi: ${response.status})`;
+        }
+
         throw new Error(errorMessage);
     }
 

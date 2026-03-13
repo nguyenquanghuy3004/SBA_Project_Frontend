@@ -3,6 +3,7 @@ import enrollmentService from "../services/enrollmentService";
 import classService from "../services/classService";
 import studentService from "../services/studentService";
 import notificationService from "../services/notificationService";
+import Pagination from "./Pagination";
 
 const StudentDashboard = ({ user }) => {
     const [activeTab, setActiveTab] = useState("overview");
@@ -12,6 +13,11 @@ const StudentDashboard = ({ user }) => {
     const [availableClasses, setAvailableClasses] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [toast, setToast] = useState(null);
+
+    const [registerPage, setRegisterPage] = useState(1);
+    const [schedulePage, setSchedulePage] = useState(1);
+    const [gradesPage, setGradesPage] = useState(1);
+    const itemsPerPage = 10;
 
     const showToast = (msg, type = "success") => {
         setToast({ msg, type });
@@ -23,6 +29,12 @@ const StudentDashboard = ({ user }) => {
     useEffect(() => {
         fetchData();
     }, [user.id]);
+
+    useEffect(() => {
+        setRegisterPage(1);
+        setSchedulePage(1);
+        setGradesPage(1);
+    }, [activeTab]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -66,7 +78,17 @@ const StudentDashboard = ({ user }) => {
     const handleUpdateMajor = async () => {
         if (!selectedMajor) return showToast("Vui lòng chọn chuyên ngành!", "error");
         try {
-            const updatedProfile = { ...profile, major: selectedMajor };
+            // Đảm bảo dữ liệu sạch và đầy đủ các trường bắt buộc
+            const updatedProfile = {
+                ...profile,
+                major: selectedMajor,
+                studentName: profile.studentName?.trim(),
+                studentEmail: profile.studentEmail?.trim(),
+                studentPhone: profile.studentPhone?.trim(),
+                // Đảm bảo GPA là số, nếu null/rỗng thì để 0.0
+                gpa: (profile.gpa === null || profile.gpa === "" || profile.gpa === undefined) ? 0.0 : parseFloat(profile.gpa)
+            };
+
             await studentService.updateStudent(profile.studentId, updatedProfile);
 
             // Cập nhật state cục bộ ngay lập tức để giao diện phản hồi nhanh
@@ -76,6 +98,7 @@ const StudentDashboard = ({ user }) => {
             showToast("✨ Đã cập nhật chuyên ngành thành công!");
             fetchData(); // Đồng bộ lại với server
         } catch (err) {
+            // Bây giờ err.message sẽ hiển thị chi tiết lý do lỗi (vd: "Email đã tồn tại")
             showToast("Lỗi: " + (err.message || "Không thể cập nhật"), "error");
         }
     };
@@ -97,7 +120,7 @@ const StudentDashboard = ({ user }) => {
         if (!window.confirm("Bạn có chắc chắn muốn hủy đăng ký môn học này?")) return;
         try {
             await enrollmentService.cancelEnrollment(profile.studentId, classId);
-            showToast("🗑️ Đã hủy đơn đăng ký.");
+            showToast("Đã hủy đơn đăng ký.");
             fetchData();
         } catch (err) {
             showToast(err.message || "Lỗi khi hủy đăng ký", "error");
@@ -116,17 +139,25 @@ const StudentDashboard = ({ user }) => {
     // --- PHẦN TÍNH TOÁN DỄ HIỂU ---
     // --- PHẦN TÍNH TOÁN (ĐÃ SỬA LỖI VIẾT HOA/THƯỜNG HỌC KỲ) ---
 
-    // 1. Tìm Học kỳ mới nhất (Hệ thống lấy HK có ID lớn nhất làm HK hiện tại)
+    // 0. Xác định Kỳ học hiện tại theo thời gian thực (Phong cách FPT)
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    const currentTerm = (currentMonth >= 1 && currentMonth <= 4) ? `Spring ${currentYear}` :
+        (currentMonth >= 5 && currentMonth <= 8) ? `Summer ${currentYear}` :
+            `Fall ${currentYear}`;
+
+    // 1. Tìm Học kỳ mới nhất trong Database (để lọc dữ liệu điểm)
     let maxId = 0;
     let tenHkSearch = "";
     for (let i = 0; i < myEnrollments.length; i++) {
         const hk = myEnrollments[i].subjectClass.semester;
         if (hk && Number(hk.id) > maxId) {
             maxId = Number(hk.id);
-            tenHkSearch = hk.name.trim().toLowerCase(); // Lấy tên viết thường để so sánh
+            tenHkSearch = hk.name.trim().toLowerCase();
         }
     }
-    const tenHKHienTai = (myEnrollments.find(e => e.subjectClass.semester.id === maxId)?.subjectClass.semester.name) || "Chưa rõ";
+    const tenHKHienTai = currentTerm; // Hiển thị theo thời gian thực thay vì "Chưa xác định"
 
     // 2. Tính GPA
     let monKyNay = [];
@@ -174,6 +205,18 @@ const StudentDashboard = ({ user }) => {
         termGpaDisplay = giaTriGPA.toFixed(2);
     }
 
+    const indexOfLastRegisterClass = registerPage * itemsPerPage;
+    const indexOfFirstRegisterClass = indexOfLastRegisterClass - itemsPerPage;
+    const currentRegisterClasses = availableClasses.slice(indexOfFirstRegisterClass, indexOfLastRegisterClass);
+
+    const indexOfLastSchedule = schedulePage * itemsPerPage;
+    const indexOfFirstSchedule = indexOfLastSchedule - itemsPerPage;
+    const currentSchedule = myEnrollments.slice(indexOfFirstSchedule, indexOfLastSchedule);
+
+    const sortedEnrollments = [...myEnrollments].sort((a, b) => b.subjectClass.semester.id - a.subjectClass.semester.id);
+    const indexOfLastGrade = gradesPage * itemsPerPage;
+    const indexOfFirstGrade = indexOfLastGrade - itemsPerPage;
+    const currentGrades = sortedEnrollments.slice(indexOfFirstGrade, indexOfLastGrade);
 
     const majors = [
         "Kỹ thuật phần mềm",
@@ -237,7 +280,13 @@ const StudentDashboard = ({ user }) => {
                             {/* Chào mừng & Cảnh báo chọn chuyên ngành */}
                             <div className="dashboard-banner">
                                 <div className="welcome-msg">
-                                    <h2>Chào buổi tối, {profile?.studentName?.split(' ').pop() || "Sinh viên"}! 👋</h2>
+                                    <h2>{(() => {
+                                        const hour = new Date().getHours();
+                                        if (hour >= 5 && hour < 12) return "Chào buổi sáng";
+                                        if (hour >= 12 && hour < 18) return "Chào buổi chiều";
+                                        if (hour >= 18 && hour < 24) return "Chào buổi tối";
+                                        return "Chào buổi đêm";
+                                    })()}, {profile?.studentName?.split(' ').pop() || user.username || "Sinh viên"}! 👋</h2>
                                     <p>Chúc bạn có một kỳ học thật bùng nổ và hiệu quả.</p>
                                 </div>
                                 {(profile?.major === "None" || !profile?.major) && (
@@ -392,11 +441,11 @@ const StudentDashboard = ({ user }) => {
                                 </div>
                                 <div className="semester-badge-modern">
                                     <span className="icon"><Icons.Clock /></span>
-                                    <span>Học kỳ: <strong>Semester 2 - 2024</strong></span>
+                                    <span>Học kỳ: <strong>{currentTerm}</strong></span>
                                 </div>
                             </div>
                             <div className="class-grid">
-                                {availableClasses.map(cls => {
+                                {currentRegisterClasses.map(cls => {
                                     // Kiểm tra xem sinh viên đã đăng ký MÔN NÀY trong HỌC KỲ NÀY chưa
                                     const isEnrolled = myEnrollments.some(en =>
                                         en.subjectClass.course.id === cls.course.id &&
@@ -437,6 +486,7 @@ const StudentDashboard = ({ user }) => {
                                     </div>
                                 )}
                             </div>
+                            <Pagination itemsPerPage={itemsPerPage} totalItems={availableClasses.length} paginate={setRegisterPage} currentPage={registerPage} />
                         </div>
                     )}
 
@@ -457,7 +507,7 @@ const StudentDashboard = ({ user }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {myEnrollments.map(en => (
+                                    {currentSchedule.map(en => (
                                         <tr key={en.id}>
                                             <td className="bold">{en.subjectClass.course.courseCode}</td>
                                             <td className="bold-text">{en.subjectClass.course.name}</td>
@@ -471,6 +521,7 @@ const StudentDashboard = ({ user }) => {
                                     )}
                                 </tbody>
                             </table>
+                            <Pagination itemsPerPage={itemsPerPage} totalItems={myEnrollments.length} paginate={setSchedulePage} currentPage={schedulePage} />
                         </div>
                     )}
 
@@ -493,7 +544,7 @@ const StudentDashboard = ({ user }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[...myEnrollments].sort((a, b) => b.subjectClass.semester.id - a.subjectClass.semester.id).map(en => (
+                                    {currentGrades.map(en => (
                                         <tr key={en.id}>
                                             <td>
                                                 <div className="subject-name-cell">
@@ -515,6 +566,7 @@ const StudentDashboard = ({ user }) => {
                                     )}
                                 </tbody>
                             </table>
+                            <Pagination itemsPerPage={itemsPerPage} totalItems={myEnrollments.length} paginate={setGradesPage} currentPage={gradesPage} />
                         </div>
                     )}
                 </div>
