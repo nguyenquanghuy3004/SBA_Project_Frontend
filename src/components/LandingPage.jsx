@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
+import graduationImg from '../assets/graduation.png';
 
 const LandingPage = ({ onNavigate }) => {
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
         <div className="landing-container">
             {/* Header / Navbar */}
-            <header className="landing-header">
+            <header className={`landing-header ${scrolled ? 'scrolled' : ''}`}>
                 <div className="logo">
                     <h2>GlobalTech University<span className="logo-dot">.</span></h2>
                 </div>
@@ -94,7 +105,7 @@ const LandingPage = ({ onNavigate }) => {
                         <p>Tòa nhà học thuật hiện đại</p>
                     </div>
                     <div className="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop" alt="Students" />
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop" alt="Students" />
                         <p>Khuôn viên học tập mở</p>
                     </div>
                     <div className="gallery-item">
@@ -106,11 +117,11 @@ const LandingPage = ({ onNavigate }) => {
                         <p>Giờ thực hành lập trình</p>
                     </div>
                     <div className="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1565034946487-0d7150a2651c?q=80&w=600&auto=format&fit=crop" alt="Graduation" />
+                        <img src={graduationImg} alt="Graduation" />
                         <p>Lễ tốt nghiệp rạng rỡ</p>
                     </div>
                     <div className="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1541252260730-0412e3e216d5?q=80&w=600&auto=format&fit=crop" alt="Sports" />
+                        <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=600&auto=format&fit=crop" alt="Sports" />
                         <p>Hoạt động thể thao năng động</p>
                     </div>
                     <div className="gallery-item">

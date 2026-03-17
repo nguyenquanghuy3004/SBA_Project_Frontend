@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import courseService from "../services/courseService";
+import Pagination from "./Pagination";
 
 const CourseManagement = () => {
     const [courses, setCourses] = useState([]);
@@ -7,6 +8,8 @@ const CourseManagement = () => {
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const showToast = (msg, type = "success") => {
         setToast({ msg, type });
@@ -74,34 +77,46 @@ const CourseManagement = () => {
             )}
             <h3>Quản lý Môn học</h3>
             <form className="admin-form" onSubmit={handleSubmit}>
-                <input
-                    placeholder="Mã môn (VD: IT101)"
-                    value={formData.courseCode}
-                    onChange={e => setFormData({ ...formData, courseCode: e.target.value })}
-                    required
-                />
-                <input
-                    placeholder="Tên môn học"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    required
-                />
-                <input
-                    type="number"
-                    placeholder="Số tín chỉ"
-                    value={formData.creadits}
-                    onChange={e => setFormData({ ...formData, creadits: parseInt(e.target.value) })}
-                    required
-                />
-                <div className="header-actions">
-                    <button type="submit" className={editingId ? "save-btn" : "add-btn"}>
-                        {editingId ? "Cập nhật môn học" : "Thêm môn học"}
-                    </button>
-                    {editingId && (
-                        <button type="button" className="cancel-btn" onClick={handleCancel}>
-                            Hủy
+                <div className="form-group">
+                    <label>Mã môn học</label>
+                    <input
+                        placeholder="VD: IT101"
+                        value={formData.courseCode}
+                        onChange={e => setFormData({ ...formData, courseCode: e.target.value })}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Tên môn học</label>
+                    <input
+                        placeholder="VD: Lập trình Java"
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Số tín chỉ</label>
+                    <input
+                        type="number"
+                        placeholder="Số tín chỉ"
+                        value={formData.creadits}
+                        onChange={e => setFormData({ ...formData, creadits: parseInt(e.target.value) })}
+                        required
+                    />
+                </div>
+                <div className="form-group" style={{ flex: 'none' }}>
+                    <label>&nbsp;</label>
+                    <div className="form-actions" style={{ display: 'flex', gap: '10px' }}>
+                        <button type="submit" className={editingId ? "save-btn" : "add-btn"}>
+                            {editingId ? "Cập nhật" : "Thêm mới"}
                         </button>
-                    )}
+                        {editingId && (
+                            <button type="button" className="cancel-btn" onClick={handleCancel}>
+                                Hủy
+                            </button>
+                        )}
+                    </div>
                 </div>
             </form>
 
@@ -115,14 +130,14 @@ const CourseManagement = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {courses.map(c => (
+                    {courses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(c => (
                         <tr key={c.id}>
                             <td>{c.courseCode}</td>
                             <td>{c.name}</td>
                             <td>{c.creadits}</td>
                             <td>
                                 <div className="header-actions">
-                                    <button onClick={() => handleEdit(c)} className="refresh-btn" style={{ padding: '6px 12px' }}>Sửa</button>
+                                    <button onClick={() => handleEdit(c)} className="edit-btn">Sửa</button>
                                     <button onClick={() => handleDelete(c.id)} className="delete-btn">Xóa</button>
                                 </div>
                             </td>
@@ -130,6 +145,12 @@ const CourseManagement = () => {
                     ))}
                 </tbody>
             </table>
+            <Pagination 
+                itemsPerPage={itemsPerPage} 
+                totalItems={courses.length} 
+                paginate={setCurrentPage} 
+                currentPage={currentPage} 
+            />
         </div>
     );
 };

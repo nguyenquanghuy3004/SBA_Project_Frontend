@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import studentService from "../services/studentService";
+import classroomService from "../services/classroomService";
 import Pagination from "./Pagination";
 
 const StudentList = ({ user }) => {
@@ -8,6 +9,12 @@ const StudentList = ({ user }) => {
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedMajor, setSelectedMajor] = useState("All");
+    const formatDate = (dateString) => {
+        if (!dateString) return "-";
+        const [year, month, day] = dateString.split("-");
+        return `${day}-${month}-${year}`;
+    };
+    const [classrooms, setClassrooms] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -23,6 +30,7 @@ const StudentList = ({ user }) => {
         dateOfBirth: "",
         studentEmail: "",
         studentPhone: "",
+        classroom: null,
         major: "",
         gpa: ""
     });
@@ -55,8 +63,18 @@ const StudentList = ({ user }) => {
     useEffect(() => {
         if (isAdminOrTeacher) {
             fetchStudents();
+            fetchClassrooms();
         }
     }, [isAdminOrTeacher]);
+
+    const fetchClassrooms = async () => {
+        try {
+            const data = await classroomService.getAllClassrooms();
+            setClassrooms(data);
+        } catch (err) {
+            console.error("Lỗi lấy danh sách lớp:", err);
+        }
+    };
 
     const handleCreateStudent = async (e) => {
         e.preventDefault();
@@ -79,6 +97,7 @@ const StudentList = ({ user }) => {
                 dateOfBirth: "",
                 studentEmail: "",
                 studentPhone: "",
+                classroom: null,
                 major: "",
                 gpa: ""
             });
@@ -235,6 +254,18 @@ const StudentList = ({ user }) => {
                                 onChange={(e) => setNewStudent({ ...newStudent, studentPhone: e.target.value })}
                                 required
                             />
+                            <select
+                                value={newStudent.classroom?.id || ""}
+                                onChange={(e) => {
+                                    const cls = classrooms.find(c => c.id === parseInt(e.target.value));
+                                    setNewStudent({ ...newStudent, classroom: cls });
+                                }}
+                            >
+                                <option value="">-- Chọn lớp sinh hoạt --</option>
+                                {classrooms.map(c => (
+                                    <option key={c.id} value={c.id}>{c.className}</option>
+                                ))}
+                            </select>
                             <input
                                 type="text"
                                 placeholder="Chuyên ngành"
@@ -317,6 +348,21 @@ const StudentList = ({ user }) => {
                                 />
                             </div>
                             <div className="form-group">
+                                <label>Lớp sinh hoạt</label>
+                                <select
+                                    value={editingStudent.classroom?.id || ""}
+                                    onChange={(e) => {
+                                        const cls = classrooms.find(c => c.id === parseInt(e.target.value));
+                                        setEditingStudent({ ...editingStudent, classroom: cls });
+                                    }}
+                                >
+                                    <option value="">-- Chọn lớp sinh hoạt --</option>
+                                    {classrooms.map(c => (
+                                        <option key={c.id} value={c.id}>{c.className}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
                                 <label>Chuyên ngành</label>
                                 <input
                                     type="text"
@@ -359,6 +405,7 @@ const StudentList = ({ user }) => {
                                 <th>Ngày sinh</th>
                                 <th>Email</th>
                                 <th>Điện thoại</th>
+                                <th>Lớp</th>
                                 <th>Chuyên ngành</th>
                                 <th>GPA</th>
                                 {(user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && <th>Thao tác</th>}
@@ -370,20 +417,18 @@ const StudentList = ({ user }) => {
                                     <td className="bold">{student.mssv}</td>
                                     <td>{student.studentName}</td>
                                     <td>{formatGender(student.gender)}</td>
-                                    <td>{student.dateOfBirth}</td>
+                                    <td>{formatDate(student.dateOfBirth)}</td>
                                     <td>{student.studentEmail}</td>
                                     <td>{student.studentPhone}</td>
+                                    <td>{student.classroom ? student.classroom.className : "Chờ xếp lớp"}</td>
                                     <td>{student.major}</td>
                                     <td>{student.gpa != null ? Number(student.gpa).toFixed(2) : "-"}</td>
                                     {(user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && (
                                         <td>
                                             <div className="header-actions">
                                                 <button
-                                                    className="refresh-btn"
-                                                    style={{ padding: '4px 8px', fontSize: '0.8rem', background: '#4f46e5' }}
-                                                    onClick={() => handleEditClick(student)}
-                                                >
-                                                    Sửa
+                                                    className="edit-btn"
+                                                    onClick={() => handleEditClick(student)} >Sửa
                                                 </button>
                                                 <button
                                                     className="delete-btn"

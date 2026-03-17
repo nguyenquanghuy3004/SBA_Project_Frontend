@@ -85,41 +85,64 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
                             {isStudent && (
                                 <>
                                     <div className="form-group">
-                                        <label>Mã Sinh Viên</label>
-                                        <input type="text" value={profile.studentId} disabled={isDisabled(true)} className="disabled-input" />
+                                        <label>Mã Số Sinh Viên (MSSV)</label>
+                                        <input type="text" value={profile.mssv || ""} disabled={isDisabled(true)} className="disabled-input" />
                                     </div>
                                     <div className="form-group">
                                         <label>Họ và Tên</label>
-                                        <input type="text" value={profile.studentName} disabled={isDisabled(true)} className="disabled-input" />
+                                        <input type="text" value={profile.studentName || ""} 
+                                            disabled={isDisabled(false)} 
+                                            onChange={e => setProfile({ ...profile, studentName: e.target.value })}
+                                        />
                                     </div>
                                     <div className="form-group">
-                                        <label>Ngành học</label>
-                                        <input type="text" value={profile.major} disabled={isDisabled(true)} className="disabled-input" />
+                                        <label>Giới tính</label>
+                                        <select 
+                                            value={profile.gender || "Nam"} 
+                                            disabled={isDisabled(false)}
+                                            onChange={e => setProfile({ ...profile, gender: e.target.value })}
+                                            className={isDisabled(false) ? "" : "editable-select"}
+                                        >
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
                                     </div>
                                     <div className="form-group">
-                                        <label>Lớp</label>
-                                        <input type="text" value={profile.studentClass || ""} disabled={isDisabled(true)} className="disabled-input" />
+                                        <label>Ngày sinh</label>
+                                        <input type="date" value={profile.dateOfBirth || ""} 
+                                            disabled={isDisabled(false)}
+                                            onChange={e => setProfile({ ...profile, dateOfBirth: e.target.value })}
+                                        />
                                     </div>
                                     <div className="form-group">
                                         <label>Email</label>
-                                        <input type="email" value={profile.studentEmail}
+                                        <input type="email" value={profile.studentEmail || ""}
                                             disabled={isDisabled(false)}
                                             onChange={e => setProfile({ ...profile, studentEmail: e.target.value })}
                                         />
                                     </div>
                                     <div className="form-group">
                                         <label>Số điện thoại</label>
-                                        <input type="text" value={profile.studentPhone}
+                                        <input type="text" value={profile.studentPhone || ""}
                                             disabled={isDisabled(false)}
                                             onChange={e => setProfile({ ...profile, studentPhone: e.target.value })}
                                         />
                                     </div>
-                                    <div className="form-group full-width">
+                                    <div className="form-group">
+                                        <label>Ngành học</label>
+                                        <input type="text" value={profile.major || ""} disabled={isDisabled(true)} className="disabled-input" />
+                                    </div>
+                                    <div className="form-group">
                                         <label>Địa chỉ</label>
                                         <input type="text" value={profile.address || ""}
                                             disabled={isDisabled(false)}
                                             onChange={e => setProfile({ ...profile, address: e.target.value })}
                                         />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Lớp sinh hoạt</label>
+                                        <input type="text" value={profile.classroom ? profile.classroom.className : "Chưa xếp lớp"} disabled={isDisabled(true)} className="disabled-input" />
                                     </div>
                                 </>
                             )}
@@ -147,10 +170,17 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
                                     </div>
                                     <div className="form-group">
                                         <label>Học vị</label>
-                                        <input type="text" value={profile.degree}
+                                        <select 
+                                            value={profile.degree || "Cử nhân"} 
                                             disabled={isDisabled(false)}
                                             onChange={e => setProfile({ ...profile, degree: e.target.value })}
-                                        />
+                                            className={isDisabled(false) ? "" : "editable-select"}
+                                        >
+                                            <option value="Cử nhân">Cử nhân</option>
+                                            <option value="Thạc sĩ">Thạc sĩ</option>
+                                            <option value="Tiến sĩ">Tiến sĩ</option>
+                                            <option value="Giáo sư">Giáo sư</option>
+                                        </select>
                                     </div>
                                 </>
                             )}

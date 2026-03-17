@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import teacherService from "../services/teacherService";
+import Pagination from "./Pagination";
 
 const TeacherManagement = () => {
     const [teachers, setTeachers] = useState([]);
@@ -9,6 +10,8 @@ const TeacherManagement = () => {
     const [editingId, setEditingId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [toast, setToast] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const showToast = (msg, type = "success") => {
         setToast({ msg, type });
@@ -39,6 +42,10 @@ const TeacherManagement = () => {
     useEffect(() => {
         fetchTeachers();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     const handleEdit = (teacher) => {
         setEditingId(teacher.id);
@@ -104,6 +111,10 @@ const TeacherManagement = () => {
         t.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.user?.username || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentTeachers = filteredTeachers.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
         <div className="student-list-container">
@@ -185,10 +196,10 @@ const TeacherManagement = () => {
                                             value={newTeacher.degree}
                                             onChange={(e) => setNewTeacher({ ...newTeacher, degree: e.target.value })}
                                         >
-                                            <option value="Bachelor">Cử nhân</option>
-                                            <option value="Master">Thạc sĩ</option>
-                                            <option value="PhD">Tiến sĩ</option>
-                                            <option value="Professor">Giáo sư</option>
+                                            <option value="Cử nhân">Cử nhân</option>
+                                            <option value="Thạc sĩ">Thạc sĩ</option>
+                                            <option value="Tiến sĩ">Tiến sĩ</option>
+                                            <option value="Giáo sư">Giáo sư</option>
                                         </select>
                                     </div>
                                 </div>
@@ -214,7 +225,7 @@ const TeacherManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredTeachers.map(t => (
+                            {currentTeachers.map(t => (
                                 <tr key={t.id}>
                                     <td className="bold">{t.teacherCode}</td>
                                     <td className="bold">{t.fullName}</td>
@@ -223,7 +234,7 @@ const TeacherManagement = () => {
                                     <td>{t.degree}</td>
                                     <td>
                                         <div className="header-actions">
-                                            <button className="refresh-btn" style={{ padding: '6px 12px' }} onClick={() => handleEdit(t)}>Sửa</button>
+                                            <button className="edit-btn" onClick={() => handleEdit(t)}>Sửa</button>
                                             <button className="delete-btn" onClick={() => handleDelete(t.id)}>Xóa</button>
                                         </div>
                                     </td>
@@ -231,6 +242,12 @@ const TeacherManagement = () => {
                             ))}
                         </tbody>
                     </table>
+                    <Pagination 
+                        itemsPerPage={itemsPerPage} 
+                        totalItems={filteredTeachers.length} 
+                        paginate={setCurrentPage} 
+                        currentPage={currentPage} 
+                    />
                 </div>
             </div>
         </div>

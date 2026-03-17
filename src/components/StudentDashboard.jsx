@@ -5,13 +5,13 @@ import studentService from "../services/studentService";
 import notificationService from "../services/notificationService";
 import Pagination from "./Pagination";
 
-const StudentDashboard = ({ user }) => {
+const StudentDashboard = ({ user, notifications = [], fetchNotifications }) => {
     const [activeTab, setActiveTab] = useState("overview");
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState(null);
     const [myEnrollments, setMyEnrollments] = useState([]);
     const [availableClasses, setAvailableClasses] = useState([]);
-    const [notifications, setNotifications] = useState([]);
+    // notifications are now props from App.jsx
     const [toast, setToast] = useState(null);
 
     const [registerPage, setRegisterPage] = useState(1);
@@ -47,13 +47,12 @@ const StudentDashboard = ({ user }) => {
                 console.warn("Chưa có hồ sơ sinh viên:", pErr.message);
             }
 
-            const [classes, notifs] = await Promise.all([
-                classService.getAllClasses().catch(() => []),
-                notificationService.getMyNotifications().catch(() => [])
+            const [classes] = await Promise.all([
+                classService.getAllClasses().catch(() => [])
             ]);
 
             setAvailableClasses(classes);
-            setNotifications(notifs);
+            // Notifications are handled by App.jsx fetching
 
             if (profileData) {
                 try {
@@ -336,28 +335,6 @@ const StudentDashboard = ({ user }) => {
                             <div className="dashboard-content-grid">
                                 <div className="main-col">
                                     <div className="section-header">
-                                        <h3><Icons.Bell /> Thông báo mới</h3>
-                                        {notifications.filter(n => !n.read).length > 0 && (
-                                            <span className="badge-new">{notifications.filter(n => !n.read).length} MỚI</span>
-                                        )}
-                                    </div>
-                                    <div className="notifications-modern">
-                                        {notifications.slice(0, 5).map(n => (
-                                            <div key={n.id} className={`notif-card ${n.read ? "read" : "unread"}`} onClick={() => markRead(n.id)}>
-                                                <div className="notif-dot"></div>
-                                                <div className="notif-body">
-                                                    <h4>{n.title}</h4>
-                                                    <p>{n.message}</p>
-                                                    <span className="time">{new Date(n.createdAt).toLocaleTimeString('vi-VN')} - {new Date(n.createdAt).toLocaleDateString()}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {notifications.length === 0 && <p className="empty-state">Hiện tại không có thông báo mới.</p>}
-                                    </div>
-                                </div>
-
-                                <div className="side-col">
-                                    <div className="section-header">
                                         <h3><Icons.School /> Thông tin trường</h3>
                                     </div>
                                     <div className="info-card-modern">
@@ -368,10 +345,6 @@ const StudentDashboard = ({ user }) => {
                                         <div className="info-row-modern">
                                             <span className="label">Ngành học</span>
                                             <span className="value highlight">{profile?.major === "None" ? "Chưa chọn " : profile?.major}{profile?.major === "None" && <Icons.Sparkles />}</span>
-                                        </div>
-                                        <div className="info-row-modern">
-                                            <span className="label">Lớp sinh hoạt</span>
-                                            <span className="value">{profile?.studentClass || "Chưa xếp lớp"}</span>
                                         </div>
                                         <div className="info-row-modern">
                                             <span className="label">Hệ đào tạo</span>
@@ -390,6 +363,22 @@ const StudentDashboard = ({ user }) => {
                                             <div className="progress-bar-container">
                                                 <div className="progress-bar-fill" style={{ width: `${Math.min(100, totalCredits / 120 * 100)}%` }}></div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="side-col">
+                                    <div className="quick-actions-card">
+                                        <h3>Thao tác nhanh</h3>
+                                        <div className="actions-grid">
+                                            <button className="action-item" onClick={() => setActiveTab("register")}>
+                                                <div className="action-icon blue"><Icons.Book /></div>
+                                                <span>Đăng ký học</span>
+                                            </button>
+                                            <button className="action-item" onClick={() => setActiveTab("schedule")}>
+                                                <div className="action-icon orange"><Icons.Calendar /></div>
+                                                <span>Xem lịch học</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

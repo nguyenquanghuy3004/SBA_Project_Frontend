@@ -3,6 +3,7 @@ import classService from "../services/classService";
 import courseService from "../services/courseService";
 import semesterService from "../services/semesterService";
 import teacherService from "../services/teacherService";
+import Pagination from "./Pagination";
 
 const ClassManagement = () => {
     const [classes, setClasses] = useState([]);
@@ -19,6 +20,8 @@ const ClassManagement = () => {
         maxStudents: 40
     });
     const [toast, setToast] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const showToast = (msg, type = "success") => {
         setToast({ msg, type });
@@ -123,7 +126,7 @@ const ClassManagement = () => {
                         onChange={e => setFormData({ ...formData, course: { id: e.target.value } })}
                         required
                     >
-                        <option value="">-- Chọn môn học --</option>
+                        <option value="">-- Chọn môn --</option>
                         {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
@@ -172,14 +175,14 @@ const ClassManagement = () => {
                     />
                 </div>
 
-                <div className="form-group">
-                    <label style={{ visibility: 'hidden' }}>Action</label>
-                    <div className="header-actions">
-                        <button type="submit" className={editingId ? "save-btn" : "add-btn"} style={{ margin: 0, height: '48px', minWidth: '120px' }}>
-                            {editingId ? "Cập nhật lớp" : "Mở lớp mới"}
+                <div className="form-group" style={{ flex: 'none' }}>
+                    <label>&nbsp;</label>
+                    <div className="form-actions" style={{ display: 'flex', gap: '10px' }}>
+                        <button type="submit" className={editingId ? "save-btn" : "add-btn"}>
+                            {editingId ? "Cập nhật" : "Mở lớp"}
                         </button>
                         {editingId && (
-                            <button type="button" className="cancel-btn" onClick={handleCancel} style={{ height: '48px' }}>
+                            <button type="button" className="cancel-btn" onClick={handleCancel}>
                                 Hủy
                             </button>
                         )}
@@ -199,7 +202,7 @@ const ClassManagement = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {classes.map(cls => (
+                    {classes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(cls => (
                         <tr key={cls.id}>
                             <td>{cls.course?.name}</td>
                             <td>
@@ -212,7 +215,7 @@ const ClassManagement = () => {
                             <td>{cls.schedule}</td>
                             <td>
                                 <div className="header-actions">
-                                    <button onClick={() => handleEdit(cls)} className="refresh-btn" style={{ padding: '6px 12px' }}>Sửa</button>
+                                    <button onClick={() => handleEdit(cls)} className="edit-btn">Sửa</button>
                                     <button onClick={() => handleDelete(cls.id)} className="delete-btn">Xóa</button>
                                 </div>
                             </td>
@@ -220,6 +223,12 @@ const ClassManagement = () => {
                     ))}
                 </tbody>
             </table>
+            <Pagination 
+                itemsPerPage={itemsPerPage} 
+                totalItems={classes.length} 
+                paginate={setCurrentPage} 
+                currentPage={currentPage} 
+            />
         </div>
     );
 };

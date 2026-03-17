@@ -6,20 +6,20 @@ import teacherService from "../services/teacherService";
 import Pagination from "./Pagination";
 import "./TeacherDashboard.css";
 
-const TeacherDashboard = ({ user }) => {
+const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNotifications }) => {
     const [activeTab, setActiveTab] = useState("overview");
     const [myClasses, setMyClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState(null);
-    const [notifications, setNotifications] = useState([]);
+    // notifications state is now coming from App.jsx props
     const [notifForm, setNotifForm] = useState({ title: "", message: "" });
     const [toast, setToast] = useState(null);
 
     const [classPage, setClassPage] = useState(1);
     const [gradePage, setGradePage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         setClassPage(1);
@@ -38,14 +38,13 @@ const TeacherDashboard = ({ user }) => {
     const fetchInitialData = async () => {
         setLoading(true);
         try {
-            const [classes, notifs, profileData] = await Promise.all([
+            const [classes, profileData] = await Promise.all([
                 classService.getClassesByTeacher(user.id),
-                notificationService.getMyNotifications(),
                 teacherService.getMyProfile()
             ]);
             setMyClasses(classes);
-            setNotifications(notifs);
             setProfile(profileData);
+            // Notifications are fetched by App.jsx
         } catch (err) {
             console.error(err);
         } finally {
@@ -163,6 +162,12 @@ const TeacherDashboard = ({ user }) => {
     const indexOfFirstGrade = indexOfLastGrade - itemsPerPage;
     const currentGrades = students.slice(indexOfFirstGrade, indexOfLastGrade);
 
+    // Dynamic Greeting
+    const hour = new Date().getHours();
+    const greeting = hour >= 5 && hour < 12 ? "Chào buổi sáng" :
+        hour >= 12 && hour < 18 ? "Chào buổi chiều" :
+            hour >= 18 && hour < 22 ? "Chào buổi tối" : "Chào buổi đêm";
+
     return (
         <div className="student-dashboard teacher-dashboard">
             {toast && (
@@ -194,45 +199,106 @@ const TeacherDashboard = ({ user }) => {
                 {/* 1. OVERVIEW */}
                 {activeTab === "overview" && (
                     <div className="overview-section fade-in">
-                        <div className="stats-grid">
-                            <div className="stat-card">
-                                <span className="stat-icon"><Icons.Id /></span>
-                                <div className="stat-info">
-                                    <p>Mã giáo viên</p>
-                                    <h3 className="highlight-blue">{profile?.teacherCode || "..."}</h3>
-                                </div>
+                        <div className="dashboard-banner teacher-banner">
+                            <div className="welcome-msg">
+                                <h2>{greeting}, {profile?.fullName?.split(' ').pop() || user.username}! 👋</h2>
+                                <p>Hệ thống quản lý giảng dạy EduFlow - Chúc bạn một ngày làm việc hiệu quả.</p>
                             </div>
-                            <div className="stat-card">
-                                <span className="stat-icon"><Icons.User /></span>
-                                <div className="stat-info">
-                                    <p>Họ và tên</p>
-                                    <h3>{profile?.fullName || user.username}</h3>
-                                </div>
-                            </div>
-                            <div className="stat-card">
-                                <span className="stat-icon"><Icons.School /></span>
-                                <div className="stat-info">
-                                    <p>Lớp học</p>
-                                    <h3>{myClasses.length}</h3>
+                            <div className="current-date-box">
+                                <span className="date-icon"><Icons.Calendar /></span>
+                                <div className="date-text">
+                                    <p>{new Date().toLocaleDateString('vi-VN', { weekday: 'long' })}</p>
+                                    <strong>{new Date().toLocaleDateString('vi-VN')}</strong>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="dashboard-main-grid">
-                            <div className="notifications-list">
-                                <h3><Icons.Bell /> Thông báo từ Admin</h3>
-                                <div className="notif-container">
-                                    {notifications.slice(0, 5).map(n => (
-                                        <div key={n.id} className={`notif-item ${n.read ? 'read' : 'unread'}`}>
-                                            <div className="notif-dot"></div>
-                                            <div className="notif-body">
-                                                <h4>{n.title}</h4>
-                                                <p>{n.message}</p>
-                                                <span className="notif-time">{new Date(n.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {notifications.length === 0 && <p className="empty-msg">Không có thông báo nào.</p>}
+                        <div className="stats-grid-modern">
+                            <div className="stat-card-modern p-gradient">
+                                <div className="card-icon"><Icons.Id /></div>
+                                <div className="card-info">
+                                    <span className="label">Mã giảng viên</span>
+                                    <span className="value">{profile?.teacherCode || "..."}</span>
+                                </div>
+                            </div>
+                            <div className="stat-card-modern s-gradient">
+                                <div className="card-icon"><Icons.School /></div>
+                                <div className="card-info">
+                                    <span className="label">Lớp phụ trách</span>
+                                    <span className="value">{myClasses.length} Lớp</span>
+                                </div>
+                            </div>
+                            <div className="stat-card-modern t-gradient">
+                                <div className="card-icon"><Icons.Bell /></div>
+                                <div className="card-info">
+                                    <span className="label">Thông báo mới</span>
+                                    <span className="value">{notifications.filter(n => !n.read).length} Tin</span>
+                                </div>
+                            </div>
+                            <div className="stat-card-modern q-gradient">
+                                <div className="card-icon"><Icons.Chart /></div>
+                                <div className="card-info">
+                                    <span className="label">Trạng thái</span>
+                                    <span className="value">Sẵn sàng</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="dashboard-content-grid">
+                            <div className="main-col">
+                                <div className="schedule-widget">
+                                    <div className="section-header">
+                                        <h3><Icons.Calendar /> Lịch dạy hôm nay</h3>
+                                    </div>
+                                    <div className="today-schedule-list">
+                                        {myClasses.length > 0 ? (
+                                            myClasses.slice(0, 3).map(cls => (
+                                                <div key={cls.id} className="schedule-item-mini">
+                                                    <div className="time-badge">{cls.schedule.split(' ')[0]}</div>
+                                                    <div className="schedule-info">
+                                                        <h4>{cls.course.name}</h4>
+                                                        <p><Icons.MapPin /> Phòng: {cls.room} | <Icons.Id /> {cls.course.courseCode}</p>
+                                                    </div>
+                                                    <button className="go-btn" onClick={() => handleViewClass(cls)}>→</button>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="empty-msg">Hôm nay bạn không có lịch dạy.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="side-col">
+                                <div className="quick-actions-card">
+                                    <h3>Thao tác nhanh</h3>
+                                    <div className="actions-grid">
+                                        <button className="action-item" onClick={() => setActiveTab("classes")}>
+                                            <div className="action-icon blue"><Icons.School /></div>
+                                            <span>Quản lý lớp</span>
+                                        </button>
+                                        <button className="action-item" onClick={() => {
+                                            if (myClasses.length > 0) handleViewClass(myClasses[0]);
+                                            else showToast("Bạn chưa có lớp học nào", "error");
+                                        }}>
+                                            <div className="action-icon orange"><Icons.Edit /></div>
+                                            <span>Nhập điểm</span>
+                                        </button>
+                                        <button className="action-item" onClick={() => {
+                                             if (myClasses.length > 0) {
+                                                 handleViewClass(myClasses[0]);
+                                                 setActiveTab("notif");
+                                             } else showToast("Bạn chưa có lớp học nào", "error");
+                                        }}>
+                                            <div className="action-icon green"><Icons.Send /></div>
+                                            <span>Gửi thông báo</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="teacher-quote-card">
+                                    <p>"Giáo dục không phải là việc đổ đầy một cái thùng, mà là thắp sáng một ngọn lửa."</p>
+                                    <span>— William Butler Yeats</span>
                                 </div>
                             </div>
                         </div>
