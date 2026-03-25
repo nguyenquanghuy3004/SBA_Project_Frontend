@@ -85,10 +85,10 @@ const ClassManagement = () => {
 
             if (editingId) {
                 await classService.updateClass(editingId, payload);
-                showToast("✅ Cập nhật lớp học thành công!");
+                showToast("Cập nhật lớp học thành công!");
             } else {
                 await classService.createClass(payload);
-                showToast("✅ Mở lớp học thành công!");
+                showToast("Mở lớp học thành công!");
             }
             handleCancel();
             fetchData();
@@ -102,7 +102,7 @@ const ClassManagement = () => {
             try {
                 await classService.deleteClass(id);
                 fetchData();
-                showToast("🗑️ Đã xóa lớp học!");
+                showToast("Đã xóa lớp học!");
             } catch (err) {
                 showToast(err.message, "error");
             }

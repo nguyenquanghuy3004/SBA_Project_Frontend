@@ -100,7 +100,7 @@ const TeacherManagement = () => {
             try {
                 await teacherService.deleteTeacher(id);
                 fetchTeachers();
-                showToast("🗑️ Đã xóa giáo viên!");
+                showToast("Đã xóa giáo viên!");
             } catch (err) {
                 showToast("Xóa thất bại: " + err.message, "error");
             }
@@ -242,11 +242,11 @@ const TeacherManagement = () => {
                             ))}
                         </tbody>
                     </table>
-                    <Pagination 
-                        itemsPerPage={itemsPerPage} 
-                        totalItems={filteredTeachers.length} 
-                        paginate={setCurrentPage} 
-                        currentPage={currentPage} 
+                    <Pagination
+                        itemsPerPage={itemsPerPage}
+                        totalItems={filteredTeachers.length}
+                        paginate={setCurrentPage}
+                        currentPage={currentPage}
                     />
                 </div>
             </div>
