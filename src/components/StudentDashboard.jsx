@@ -343,6 +343,10 @@ const StudentDashboard = ({ user, notifications = [], fetchNotifications }) => {
                                             <span className="value bold highlight-blue">{profile?.mssv}</span>
                                         </div>
                                         <div className="info-row-modern">
+                                            <span className="label">Lớp sinh hoạt</span>
+                                            <span className="value bold">{profile?.classroom?.className || "Chưa xếp lớp"}</span>
+                                        </div>
+                                        <div className="info-row-modern">
                                             <span className="label">Ngành học</span>
                                             <span className="value highlight">{profile?.major === "None" ? "Chưa chọn " : profile?.major}{profile?.major === "None" && <Icons.Sparkles />}</span>
                                         </div>

@@ -15,7 +15,7 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
     const isStudent = user?.roles.includes("STUDENT");
     const isTeacher = user?.roles.includes("TEACHER");
 
-    // Helper to determine if a field should be disabled
+   
     const isDisabled = (alwaysDisabled = false) => {
         if (!isEditMode) return true; // View mode: everything disabled
         return alwaysDisabled; // Edit mode: only restricted fields disabled
