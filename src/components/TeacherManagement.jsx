@@ -107,10 +107,12 @@ const TeacherManagement = () => {
         }
     };
 
-    const filteredTeachers = teachers.filter(t =>
-        t.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (t.user?.username || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredTeachers = teachers.filter(t => {
+        const searchLower = searchTerm.toLowerCase();
+        return (t.fullName && t.fullName.toLowerCase().includes(searchLower)) ||
+            (t.teacherCode && t.teacherCode.toLowerCase().includes(searchLower)) ||
+            (t.user?.username && t.user.username.toLowerCase().includes(searchLower));
+    });
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -131,7 +133,7 @@ const TeacherManagement = () => {
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="Tìm theo tên..."
+                            placeholder="Tìm theo tên, mã hoặc username..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

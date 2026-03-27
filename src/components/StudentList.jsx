@@ -157,8 +157,10 @@ const StudentList = ({ user }) => {
     }
 
     const filteredStudents = students.filter(s => {
-        const matchSearch = s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            s.studentId.toString().includes(searchTerm);
+        const searchLower = searchTerm.toLowerCase();
+        const matchSearch = 
+            (s.studentName && s.studentName.toLowerCase().includes(searchLower)) ||
+            (s.mssv && s.mssv.toLowerCase().includes(searchLower));
         const matchMajor = selectedMajor === "All" || s.major === selectedMajor;
         return matchSearch && matchMajor;
     });
