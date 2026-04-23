@@ -74,7 +74,7 @@ const CourseManagement = () => {
                     <span className="toast-msg">{toast.msg}</span>
                     <button className="toast-close" onClick={() => setToast(null)}>✕</button>
                 </div>
-            )}
+            )}  
             <h3>Quản lý Môn học</h3>
             <form className="admin-form" onSubmit={handleSubmit}>
                 <div className="form-group">

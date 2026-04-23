@@ -13,7 +13,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState(null);
-    // notifications state is now coming from App.jsx props
+   
     const [notifForm, setNotifForm] = useState({ title: "", message: "" });
     const [toast, setToast] = useState(null);
 
@@ -44,7 +44,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
             ]);
             setMyClasses(classes);
             setProfile(profileData);
-            // Notifications are fetched by App.jsx
+          
         } catch (err) {
             console.error(err);
         } finally {
@@ -55,14 +55,14 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
     const handleViewClass = async (cls) => {
         setSelectedClass(cls);
         setStudents([]);
-        setActiveTab("grades"); // Chuyển tab trước để UX mượt hơn
+        setActiveTab("grades");
         setLoading(true);
         try {
             const data = await enrollmentService.getClassList(cls.id);
             setStudents(data);
         } catch (err) {
             console.error("Lỗi tải DS sinh viên:", err);
-            // Không hiện toast lỗi nếu chỉ là chưa có sinh viên đăng ký
+           
             setStudents([]);
         } finally {
             setLoading(false);
@@ -78,7 +78,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
         }
 
         const numValue = parseFloat(value);
-        // Sửa lại logic: Nếu điểm <= 0 HOẶC điểm >= 10 thì báo lỗi
+     
         if (isNaN(numValue) || numValue <= 0 || numValue >= 10) {
             showToast("Điểm phải là số lớn hơn 0 và nhỏ hơn 10!", "error");
             return;
@@ -91,8 +91,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
 
     const saveGrades = async (enrollmentId) => {
         const student = students.find(s => s.id === enrollmentId);
-
-        // Kiểm tra trước khi lưu: Phải lớn hơn 0 và nhỏ hơn 10
+//Phải lớn hơn 0 và nhỏ hơn 10
         if (
             student.attendanceScore <= 0 || student.attendanceScore >= 10 ||
             student.midtermScore <= 0 || student.midtermScore >= 10 ||
@@ -162,7 +161,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
     const indexOfFirstGrade = indexOfLastGrade - itemsPerPage;
     const currentGrades = students.slice(indexOfFirstGrade, indexOfLastGrade);
 
-    // Dynamic Greeting
+  
     const hour = new Date().getHours();
     const greeting = hour >= 5 && hour < 12 ? "Chào buổi sáng" :
         hour >= 12 && hour < 18 ? "Chào buổi chiều" :
@@ -305,7 +304,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
                     </div>
                 )}
 
-                {/* 2. CLASSES */}
+                
                 {activeTab === "classes" && (
                     <div className="registration-section fade-in">
                         <div className="section-header">
@@ -329,7 +328,7 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
                     </div>
                 )}
 
-                {/* 3. GRADES */}
+               
                 {activeTab === "grades" && selectedClass && (
                     <div className="grades-section fade-in">
                         <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -412,8 +411,6 @@ const TeacherDashboard = ({ user, notifications = [], setNotifications, fetchNot
                     </div>
                 )}
 
-                {/* 4. NOTIFICATIONS */}
-                {/* 4. NOTIFICATIONS */}
                 {activeTab === "notif" && selectedClass && (
                     <div className="notif-compose-section fade-in">
                         <div className="section-header">

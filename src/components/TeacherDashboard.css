@@ -1,6 +1,3 @@
-/* ============================================================
-   TeacherDashboard.css — Ultra-Premium Edition
-   ============================================================ */
 
 :root {
     --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -20,7 +17,7 @@
     font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* --- Banner Section --- */
+
 .teacher-banner {
     background: var(--primary-gradient);
     color: white;

@@ -17,8 +17,8 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
 
    
     const isDisabled = (alwaysDisabled = false) => {
-        if (!isEditMode) return true; // View mode: everything disabled
-        return alwaysDisabled; // Edit mode: only restricted fields disabled
+        if (!isEditMode) return true;
+        return alwaysDisabled; 
     };
 
     useEffect(() => {
@@ -81,7 +81,7 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
                 ) : profile ? (
                     <form onSubmit={handleUpdate} className="profile-form-compact">
                         <div className="form-grid">
-                            {/* CÁC TRƯỜNG CHO SINH VIÊN */}
+                         
                             {isStudent && (
                                 <>
                                     <div className="form-group">
@@ -147,7 +147,7 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
                                 </>
                             )}
 
-                            {/* CÁC TRƯỜNG CHO GIẢNG VIÊN */}
+                         
                             {isTeacher && (
                                 <>
                                     <div className="form-group">
@@ -185,7 +185,7 @@ const ProfileModal = ({ isOpen, onClose, user, isEditMode }) => {
                                 </>
                             )}
 
-                            {/* CÁC TRƯỜNG CHO ADMIN HOẶC USER CHUNG */}
+                          
                             {!isStudent && !isTeacher && (
                                 <>
                                     <div className="form-group">

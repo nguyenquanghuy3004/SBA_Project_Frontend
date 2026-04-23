@@ -77,7 +77,7 @@ const TeacherManagement = () => {
         e.preventDefault();
         try {
             if (editingId) {
-                // Chỉ gửi dữ liệu profile khi update (Backend thường không cho đổi username qua hàm này)
+             
                 await teacherService.updateTeacher(editingId, {
                     fullName: newTeacher.fullName,
                     department: newTeacher.department,
@@ -150,6 +150,7 @@ const TeacherManagement = () => {
                                 <div className="form-grid">
                                     <div className="section">
                                         <h4>Thông tin tài khoản {editingId && "(Chỉ đọc)"}</h4>
+                                        
                                         <input
                                             type="text"
                                             placeholder="Tên đăng nhập"
